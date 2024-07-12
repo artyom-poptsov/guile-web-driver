@@ -6,6 +6,12 @@
  (srfi srfi-1) (srfi srfi-9) (srfi srfi-27)
  (web client) (web request) (web response) (web server))
 
+
+(define %server-address INADDR_LOOPBACK)
+(define %server-port    8080)
+(define %server-backlog 16)
+
+
 (define web-server #f)
 (define current-handler #f)
 
@@ -18,8 +24,8 @@ localhost:8080."
       ;; as this procedure returns.
       (let ((server-socket (socket PF_INET SOCK_STREAM 0)))
         (setsockopt server-socket SOL_SOCKET SO_REUSEADDR 1)
-        (bind server-socket AF_INET INADDR_LOOPBACK 8080)
-        (listen server-socket 16)
+        (bind server-socket AF_INET %server-address %server-port)
+        (listen server-socket %server-backlog)
         (set! web-server #t)
         (call-with-new-thread
          (lambda ()
