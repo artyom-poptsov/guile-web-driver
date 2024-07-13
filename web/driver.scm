@@ -15,6 +15,12 @@
 (define web-server #f)
 (define current-handler #f)
 
+
+
+(define (request-body->bytevector body-string)
+  "Convert a request BODY-STRING into a bytevector.  Return the bytevector."
+  (string->bytevector body-string "utf-8"))
+
 (define-public (set-web-handler! handler)
   "Sets the current handler for the testing web server listening on
 localhost:8080."
@@ -36,7 +42,7 @@ localhost:8080."
 
 (define (request method uri body-scm)
   (define body-string (scm->json-string body-scm))
-  (define body-bytevector (and body-scm (string->bytevector body-string "utf-8")))
+  (define body-bytevector (and body-scm (request-body->bytevector body-string)))
   (call-with-values
       (lambda ()
         (http-request uri #:method method #:body body-bytevector))
