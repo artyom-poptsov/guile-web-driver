@@ -129,18 +129,26 @@ localhost:8080."
     (close-port s)
     port))
 
+
 (define (launch-and-open command args capabilities)
   (let* ((port (free-listen-port))
          (pipe (apply open-pipe* OPEN_WRITE command (format #f "--port=~a" port) args))
          (uri (format #f "http://localhost:~a" port)))
     (open* uri (lambda () (close-driver-pipe pipe)) capabilities)))
 
+(define %chromedriver-command "chromedriver")
+(define %chromedriver-arguments '("--silent"))
 (define (open-chromedriver capabilities)
-  (launch-and-open "chromedriver" '("--silent") capabilities))
+  "Start chromedriver instance with the specified CAPABILITIES."
+  (launch-and-open %chromedriver-command %chromedriver-arguments capabilities))
 
+(define %geckodriver-command "geckodriver")
+(define %geckodriver-arguments '("--log" "fatal"))
 (define (open-geckodriver capabilities)
-  (launch-and-open "geckodriver" '("--log" "fatal") capabilities))
+  "Start geckgodriver instance with the specified CAPABILITIES."
+  (launch-and-open %geckodriver-command %geckodriver-arguments capabilities))
 
+
 (set! *random-state* (random-state-from-platform))
 
 (define (add-firefox-headless capabilities)
