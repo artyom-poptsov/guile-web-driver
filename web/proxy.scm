@@ -1,0 +1,391 @@
+;;; proxy.scm -- Selenium WebDriver proxy.
+
+;; Copyright (C) 2024 Artyom V. Poptsov <poptsov.artyom@gmail.com>
+;;
+;; This program is free software: you can redistribute it and/or modify it
+;; under the terms of the GNU General Public License as published by the Free
+;; Software Foundation, version 3.
+;;
+;; The program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with the program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+;;; Commentary:
+
+;; This proxy can be used to intercept HTTP/HTTPS traffic between a browser
+;; and a server and change HTTP headers.
+
+
+;;; Code:
+
+(define-module (web proxy)
+  #:use-module (ice-9 threads)
+  #:use-module (ice-9 receive)
+  #:use-module (ice-9 binary-ports)
+  #:use-module (ice-9 rdelim)
+  #:use-module (srfi srfi-11)
+  #:use-module (rnrs bytevectors)
+  #:use-module (gnutls)
+  #:use-module (oop goops)
+  #:use-module (web uri)
+  #:use-module (web client)
+  #:use-module (web request)
+  #:use-module (web response)
+  #:use-module (web server)
+  #:export (<proxy>
+            proxy?
+            proxy-port
+            proxy-socket
+            proxy-connections
+            proxy-headers
+
+            proxy-start!
+
+            <proxy-connection>
+            proxy-connection-host
+            proxy-connection-port
+            proxy-connection-client
+            proxy-connection-client-port
+            proxy-connection-target-port
+
+            make-key))
+
+
+
+;; This class describes a proxy.
+(define-class <proxy> ()
+  ;; Proxy address to listen to.
+  ;;
+  ;; <number>
+  (address
+   #:init-value   INADDR_LOOPBACK
+   #:init-keyword #:address
+   #:getter       proxy-address)
+
+  ;; Proxy TCP port to listen to.
+  ;;
+  ;; <number>
+  (port
+   #:init-value   8080
+   #:init-keyword #:port
+   #:getter       proxy-port)
+
+  ;; Proxy socket.
+  ;;
+  ;; <socket>
+  (proxy-socket
+   #:init-value   #f
+   #:getter       proxy-socket
+   #:setter       proxy-socket-set!)
+
+  ;; <number>
+  (backlog
+   #:init-value   1
+   #:init-keyword #:backlog
+   #:getter       proxy-backlog)
+
+  ;; A hash table of proxy connections.
+  ;;
+  ;; <hash-table>
+  (connections
+   #:init-value   (make-hash-table 10)
+   #:getter       proxy-connections)
+
+  ;; An associative list of headers to replace for the interceptor.
+  ;;
+  ;; <list>
+  (headers
+   #:init-value   #f
+   #:init-keyword #:headers
+   #:getter       proxy-headers))
+
+(define-class <proxy-connection> ()
+  ;; The name of a host that the client wants to connect though the proxy.
+  ;;
+  ;; <string>
+  (host
+   #:init-value   #f
+   #:init-keyword #:host
+   #:getter       proxy-connection-host)
+
+  ;; The port number the client wants to connect to.
+  ;;
+  ;; <number>
+  (port
+   #:init-value   #f
+   #:init-keyword #:port
+   #:getter       proxy-connection-port)
+
+  ;; Proxy client.  The car of the pair is the client socket.
+  ;;
+  ;; <pair>
+  (client
+   #:init-value   #f
+   #:init-keyword #:client
+   #:getter       proxy-connection-client)
+
+  ;; A Scheme port (TCP socket) that is connect to the server.
+  ;;
+  ;; <port>
+  (target-port
+   #:init-value   #f
+   #:init-keyword #:target-port
+   #:getter       proxy-connection-target-port))
+
+(define-method (proxy-connection-client-port (connection <proxy-connection>))
+  "Get the client socket for a proxy CONNECTION."
+  (car (proxy-connection-client connection)))
+
+
+
+(define-method (proxy? x)
+  "Predicate.  Check if X is a <proxy> instance."
+  (is-a? x <proxy>))
+
+
+;; TODO: This is for debugging.  Implement proper logging instead.
+(define mtx (make-mutex 'recursive))
+(define (format dest fmt . args)
+  (lock-mutex mtx)
+  (apply (@@ (guile) format)
+         (current-error-port)
+         (string-append ";;; " fmt)
+         args)
+  (unlock-mutex mtx))
+
+
+
+(define-method (make-key (host <string>) (port <number>))
+  "Make a key for a <proxy> connections hash table."
+  (string-append host ":" (number->string port)))
+
+(define-method (proxy-connect! (proxy <proxy>)
+                               (client <pair>)
+                               (host <string>)
+                               (tcp-port <number>))
+  "Connection to a target host which was requested by a client.  Return a new
+<proxy-connection> instance."
+  (let* ((connections (proxy-connections proxy))
+         (s  (socket PF_INET SOCK_STREAM 0))
+         (ai (car (getaddrinfo host))))
+    (connect s
+             AF_INET
+             (sockaddr:addr (addrinfo:addr ai))
+             tcp-port)
+    (let ((conn (make <proxy-connection>
+                  #:host host
+                  #:port tcp-port
+                  #:client client
+                  #:target-port s)))
+      (hash-set! connections
+                 (make-key host tcp-port)
+                 conn)
+      conn)))
+
+(define-method (proxy-connection (proxy <proxy>)
+                                 (host <string>)
+                                 (port <number>))
+  "Get a <proxy-connection> instance for a PROXY."
+  (let ((connections (proxy-connections proxy)))
+    (hash-ref connections (make-key host port))))
+
+(define-method (proxy-disconnect! (proxy <proxy>)
+                                  (host <string>)
+                                  (port <number>))
+  "Disconnect a PROXY from a HOST and a PORT.  Return value is undefined."
+  (let ((conn (proxy-connection proxy host port)))
+    (when conn
+      (close (proxy-connection-target-port conn))
+      (hash-remove! (proxy-connections proxy) (make-key host port)))))
+
+(define-method (proxy-create-socket (proxy <proxy>))
+  "Create a TCP/IP socket for a PROXY to listen to."
+  (socket PF_INET SOCK_STREAM 0))
+
+(define-method (proxy-listen! (proxy <proxy>))
+  "Listen to incoming connections for a proxy.  Return value is undefined."
+  (let ((s (proxy-create-socket proxy)))
+    (proxy-socket-set! proxy s)
+    (setsockopt s SOL_SOCKET SO_REUSEADDR 1)
+    (bind s AF_INET (proxy-address proxy) (proxy-port proxy))
+    (listen s (proxy-backlog proxy))))
+
+(define (import-key import-proc file)
+  "Import a key FILE using a procedure IMPORT-PROC, return the imported key."
+  (let* ((raw (get-bytevector-all (open-input-file file))))
+    (import-proc raw x509-certificate-format/pem)))
+
+(define-method (proxy-intercept (proxy <proxy>)
+                                (connection <proxy-connection>))
+  "Intercept the traffic coming through a PROXY, replace HTTP headers on the way."
+  (let ((server (make-session connection-end/server))
+        (client-port (proxy-connection-client-port connection))
+        (target-port (proxy-connection-target-port connection))
+        (pub    (import-key import-x509-certificate
+                            "cert/cert.pem"))
+        (sec    (import-key import-x509-private-key
+                            "cert/key.pem")))
+
+    (format (current-error-port) "pub: ~S; sec: ~S~%" pub sec)
+
+    (set-session-priorities! server
+                             "NORMAL:+ARCFOUR-128:+CTYPE-X509")
+
+    ;; Specify the underlying transport socket.
+    (set-session-transport-fd! server (fileno client-port))
+
+    ;; Create anonymous credentials.
+    (let ((cred (make-certificate-credentials)))
+      (set-certificate-credentials-x509-keys! cred
+                                              (list pub)
+                                              sec)
+      (set-session-credentials! server cred))
+
+    ;; Perform the TLS handshake with the client.
+    (catch #t
+      (lambda ()
+        (handshake server))
+      (lambda (key . args)
+        (rehandshake server)))
+
+    ;; Receive data over the TLS record layer.
+    (let* ((origin-request (read-request (session-record-port server)))
+           (origin-uri     (request-uri origin-request))
+           (uri            (build-uri 'https
+                                      #:host (proxy-connection-host connection)
+                                      #:port (proxy-connection-port connection)
+                                      #:path (uri-path origin-uri)
+                                      #:query (uri-query origin-uri)))
+           (headers        (proxy-headers proxy)))
+      (format #t "received the following message: ~a~%"
+              origin-request)
+      (format #t "uri: ~a~%"
+              uri)
+      (receive (response response-body)
+          (http-request uri
+                        #:method (request-method origin-request)
+                        #:version (request-version origin-request)
+                        #:headers (if headers
+                                      headers
+                                      (request-headers origin-request))
+                        #:decode-body? #f)
+        (write-response response (session-record-port server))
+        (put-bytevector (session-record-port server)
+                        response-body)
+        (force-output (session-record-port server))
+        (bye server close-request/rdwr)))))
+
+(define-method (transfer-data (proxy <proxy>) (connection <proxy-connection>))
+  "Transfer data through a PROXY."
+  (define (client-to-destination client-socket)
+    (call-with-new-thread
+     (lambda ()
+       (while (not (port-closed? client-socket))
+         (proxy-intercept proxy connection)))))
+
+  (define (destination-to-client client-socket)
+    (let ((buf (make-bytevector 1)))
+      (while (not (port-closed? (proxy-connection-target-port connection)))
+        (catch #t
+          (lambda ()
+            (let ((count (recv! (proxy-connection-target-port connection)
+                                buf)))
+              (if (> count 0)
+                  (send client-socket buf)
+                  (begin
+                    (sleep 1)))))
+          (lambda (key . args)
+            (format #t "DEBUG ERR\n"))))))
+
+  (let ((client-socket (proxy-connection-client-port connection)))
+    (client-to-destination client-socket)
+    (destination-to-client client-socket)))
+
+(define (forward-request proxy connection request body)
+  (let* ((client-socket (proxy-connection-client-port connection))
+         (headers       (request-headers request))
+         (headers       (cons '(Test-Header . "test") headers))
+         (method        (request-method request))
+         (uri           (request-uri request))
+         (host          (symbol->string (uri-scheme uri)))
+         (port          (string->number (uri-path uri)))
+         (meta          (request-meta request))
+         (version       (request-version request)))
+    (display headers)
+    (newline)
+    (receive (response response-body)
+        (http-request uri
+                      #:method  method
+                      #:body    body
+                      #:version version
+                      #:headers headers
+                      #:decode-body? #f)
+      (let ((r (build-response #:version       (response-version response)
+                               #:code          (response-code response)
+                               #:reason-phrase (response-reason-phrase response)
+                               #:headers       (response-headers response)
+                               #:port          client-socket)))
+        (write-response r client-socket)
+        (force-output client-socket)
+        (when response-body
+          (write-response-body r response-body))
+        (force-output client-socket)))))
+
+(define (handle-request proxy client)
+  "Accept a CONNECT request on PROXY from a CLIENT."
+  (let* ((client-socket (car client))
+         (request       (read-request client-socket))
+         (body          (read-request-body request))
+         (method  (request-method request))
+         (uri     (request-uri request))
+         (host    (symbol->string (uri-scheme uri)))
+         (port    (string->number (uri-path uri)))
+         (meta    (request-meta request))
+         (version (request-version request)))
+    (format (current-error-port)
+            "request: ~S; body: ~S; uri: ~S; host: ~S, port: ~S~%"
+            request
+            body
+            uri
+            host
+            port)
+    (case method
+      ((CONNECT)
+       (let ((connection (proxy-connect! proxy client host port))
+             (response (build-response)))
+         (write-response response client-socket)
+         (force-output client-socket)
+         (transfer-data proxy connection)))
+      (else
+       (let ((connection (proxy-connect! proxy host port)))
+         (forward-request proxy connection request body))))))
+
+(define-method (proxy-handle-client (proxy <proxy>) client)
+  "Handle a TCP/IP CLIENT connected to a PROXY."
+  (call-with-new-thread
+   (lambda ()
+     (handle-request proxy client))))
+
+(define-method (proxy-start! (proxy <proxy>))
+  "Start a PROXY.  If the PROXY is already started the procedure throws an error."
+  (when (proxy-socket proxy)
+    (error "Proxy already started" proxy))
+  (proxy-listen! proxy)
+  (call-with-new-thread
+   (lambda ()
+     (while #t
+       (catch #t
+         (lambda ()
+           (let ((client (accept (proxy-socket proxy))))
+             (proxy-handle-client proxy client)))
+         (lambda (key . args)
+           (format (current-error-port)
+                   ";;; ERROR: ~a: ~a~%"
+                   key args)))))))
+
+;;; proxy.scm ends here.

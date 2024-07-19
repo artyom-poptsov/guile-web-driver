@@ -1,6 +1,7 @@
 ## Makefile.am -- Config file for GNU Automake.
 ##
 ## Copyright (C) 2019-2023 Michal Herko <michal.herko@disroot.org>
+## Copyright (C) 2024 Artyom V. Poptsov <poptsov.artyom@gmail.com>
 ##
 ## This file is part of Guile-Web-Driver.
 ##
@@ -21,7 +22,8 @@ include $(top_srcdir)/build-aux/am/guile.am
 SUBDIRS = driver .
 
 SOURCES = \
-	driver.scm
+	driver.scm	\
+	proxy.scm
 
 moddir=$(prefix)/share/guile/site/$(GUILE_EFFECTIVE_VERSION)/web/
 godir=$(libdir)/guile/$(GUILE_EFFECTIVE_VERSION)/site-ccache/web/

@@ -45,6 +45,7 @@
              (gnu packages guile-xyz)
              (gnu packages pkg-config)
              (gnu packages texinfo)
+             (gnu packages tls)
              (gnu packages man)
 
              ;; For Guile-SMC
@@ -69,6 +70,7 @@
            pkg-config
            texinfo
            ;; needed when cross-compiling.
+           guile-gnutls
            guile-3.0))
     (inputs (list guile-3.0))
     (propagated-inputs (list guile-json-4))
