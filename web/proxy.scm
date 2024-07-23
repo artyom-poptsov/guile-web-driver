@@ -111,7 +111,7 @@
 (define (format dest fmt . args)
   (lock-mutex mtx)
   (apply (@@ (guile) format)
-         (current-error-port)
+         dest
          (string-append ";;; " fmt)
          args)
   (unlock-mutex mtx))
