@@ -31,7 +31,9 @@
             proxy-connection-port
             proxy-connection-client
             proxy-connection-client-port
-            proxy-connection-target-port))
+            proxy-connection-target-port
+            proxy-connection-tls-session
+            proxy-connection-tls-session-set!))
 
   
 (define-class <proxy-connection> ()
@@ -65,7 +67,13 @@
   (target-port
    #:init-value   #f
    #:init-keyword #:target-port
-   #:getter       proxy-connection-target-port))
+   #:getter       proxy-connection-target-port)
+
+  (tls-session
+   #:init-value   #f
+   #:init-keyword #:tcp-session
+   #:getter       proxy-connection-tls-session
+   #:setter       proxy-connection-tls-session-set!))
 
 
 
