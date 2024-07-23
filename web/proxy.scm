@@ -46,6 +46,7 @@
             proxy-headers
 
             proxy-start!
+            proxy-stop!
 
             make-key))
 
@@ -352,5 +353,11 @@
            (format (current-error-port)
                    ";;; ERROR: ~a: ~a~%"
                    key args)))))))
+
+(define-method (proxy-stop! (proxy <proxy>))
+  "Stop a PROXY."
+  (hash-for-each (lambda (key connection)
+                   (proxy-connection-close! connection))
+                 (proxy-connections proxy)))
 
 ;;; proxy.scm ends here.

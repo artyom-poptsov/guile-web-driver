@@ -33,7 +33,8 @@
             proxy-connection-client-port
             proxy-connection-target-port
             proxy-connection-tls-session
-            proxy-connection-tls-session-set!))
+            proxy-connection-tls-session-set!
+            proxy-connection-close!))
 
   
 (define-class <proxy-connection> ()
@@ -101,5 +102,9 @@
 (define-method (proxy-connection-client-port (connection <proxy-connection>))
   "Get the client socket for a proxy CONNECTION."
   (car (proxy-connection-client connection)))
+
+(define-method (proxy-connection-close! (connection <proxy-connection>))
+  (close (proxy-connection-client-port connection))
+  (close (proxy-connection-target-port connection)))
 
 ;;; connection.scm ends here.
