@@ -344,7 +344,7 @@
   (proxy-listen! proxy)
   (call-with-new-thread
    (lambda ()
-     (while #t
+     (while (not (port-closed? (proxy-socket proxy)))
        (catch #t
          (lambda ()
            (let ((client (accept (proxy-socket proxy))))
@@ -358,6 +358,7 @@
   "Stop a PROXY."
   (hash-for-each (lambda (key connection)
                    (proxy-connection-close! connection))
-                 (proxy-connections proxy)))
+                 (proxy-connections proxy))
+  (close (proxy-socket proxy)))
 
 ;;; proxy.scm ends here.
