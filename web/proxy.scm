@@ -37,6 +37,7 @@
   #:use-module (web request)
   #:use-module (web response)
   #:use-module (web server)
+  #:use-module (web proxy connection)
   #:export (<proxy>
             proxy?
             proxy-port
@@ -103,43 +104,6 @@
    #:init-value   #f
    #:init-keyword #:headers
    #:getter       proxy-headers))
-
-(define-class <proxy-connection> ()
-  ;; The name of a host that the client wants to connect though the proxy.
-  ;;
-  ;; <string>
-  (host
-   #:init-value   #f
-   #:init-keyword #:host
-   #:getter       proxy-connection-host)
-
-  ;; The port number the client wants to connect to.
-  ;;
-  ;; <number>
-  (port
-   #:init-value   #f
-   #:init-keyword #:port
-   #:getter       proxy-connection-port)
-
-  ;; Proxy client.  The car of the pair is the client socket.
-  ;;
-  ;; <pair>
-  (client
-   #:init-value   #f
-   #:init-keyword #:client
-   #:getter       proxy-connection-client)
-
-  ;; A Scheme port (TCP socket) that is connect to the server.
-  ;;
-  ;; <port>
-  (target-port
-   #:init-value   #f
-   #:init-keyword #:target-port
-   #:getter       proxy-connection-target-port))
-
-(define-method (proxy-connection-client-port (connection <proxy-connection>))
-  "Get the client socket for a proxy CONNECTION."
-  (car (proxy-connection-client connection)))
 
 
 
