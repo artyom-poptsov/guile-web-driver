@@ -24,6 +24,7 @@
 
 (define-module (web proxy connection)
   #:use-module (oop goops)
+  #:use-module (web proxy common)
   #:export (<proxy-connection>
             proxy-connection?
             proxy-connection-host
@@ -65,6 +66,21 @@
    #:init-value   #f
    #:init-keyword #:target-port
    #:getter       proxy-connection-target-port))
+
+
+
+(define-method (%display (connection <proxy-connection>) (port <port>))
+  (format port
+          "#<proxy-connection ~a:~a ~a>"
+          (proxy-connection-host connection)
+          (proxy-connection-port connection)
+          (object-address/hex-string connection)))
+
+(define-method (display (connection <proxy-connection>) (port <port>))
+  (%display connection port))
+
+(define-method (write (connection <proxy-connection>) (port <port>))
+  (%display connection port))
 
 
 
