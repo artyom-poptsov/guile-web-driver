@@ -19,13 +19,10 @@
 
 include $(top_srcdir)/build-aux/am/guile.am
 
-SUBDIRS = driver proxy .
-
 SOURCES = \
-	driver.scm	\
-	proxy.scm
+	connection.scm
 
-moddir=$(prefix)/share/guile/site/$(GUILE_EFFECTIVE_VERSION)/web/
-godir=$(libdir)/guile/$(GUILE_EFFECTIVE_VERSION)/site-ccache/web/
+moddir=$(prefix)/share/guile/site/$(GUILE_EFFECTIVE_VERSION)/web/proxy/
+godir=$(libdir)/guile/$(GUILE_EFFECTIVE_VERSION)/site-ccache/web/proxy/
 
 ### Makefile.am ends here.
