@@ -47,13 +47,6 @@
 
             proxy-start!
 
-            <proxy-connection>
-            proxy-connection-host
-            proxy-connection-port
-            proxy-connection-client
-            proxy-connection-client-port
-            proxy-connection-target-port
-
             make-key))
 
 
