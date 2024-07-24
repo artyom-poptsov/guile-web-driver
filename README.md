@@ -19,7 +19,7 @@ The client implements most of the webdriver [specification](https://www.w3.org/T
 
 The manual installation process looks like follows:
 ```
-git clone https://github.com/her01n/guile-web-driver-ng.git
+git clone https://github.com/artyom-poptsov/guile-web-driver-ng.git
 cd guile-web-driver-ng
 autoreconf -vif
 ./configure --prefix=/usr
