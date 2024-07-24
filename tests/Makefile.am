@@ -1,5 +1,6 @@
 SCM_TESTS = \
-	web/proxy/common.scm
+	web/proxy/common.scm		\
+	web/proxy/connection.scm
 
 TESTS = ${SCM_TESTS}
 
