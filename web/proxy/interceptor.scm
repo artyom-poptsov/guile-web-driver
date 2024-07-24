@@ -42,7 +42,6 @@
   #:use-module (oop goops)
   #:use-module (ice-9 receive)
   #:use-module (ice-9 binary-ports)
-  #:use-module (ice-9 pretty-print)
   #:use-module (srfi srfi-1)
   #:use-module (rnrs bytevectors)
   #:use-module (gnutls)
@@ -52,6 +51,7 @@
   #:use-module (web uri)
   #:use-module (web proxy common)
   #:use-module (web proxy connection)
+  #:use-module (web proxy interceptor chain)
   #:export (<proxy-interceptor>
             proxy-interceptor-chain
             proxy-interceptor-tls-session-priorities
@@ -163,52 +163,6 @@ INTERCEPTOR.  Return two values: a X509 certificate and a private key."
     (format (current-error-port) "private key: ~S~%" private-key)
     (proxy-interceptor-x509-certificate-set! interceptor certificate)
     (proxy-interceptor-x509-private-key-set! interceptor private-key)))
-
-
-
-(define-method (rule:type (rule <list>))
-  (list-ref rule 0))
-
-(define-method (rule:field (rule <list>))
-  (list-ref rule 1))
-
-(define-method (rule:action (rule <list>))
-  (list-ref rule 2))
-
-(define-method (rule:parameters (rule <list>))
-  (list-ref rule 3))
-
-(define-method (chain-select (chain <list>) (type <symbol>))
-  "Select all the chains of the TYPE from a SCENARIO."
-  (fold (lambda (rule prev)
-          (if (equal? (rule:type rule) type)
-              (cons rule prev)
-              prev))
-        '()
-        chain))
-
-(define-method (chain-run (chain <list>) (field <symbol>) object)
-  "Run an interceptor CHAIN for a FIELD on an OBJECT (the field value.)"
-  (fold (lambda (rule prev-object)
-          (format (current-error-port) "rule: ~a; obj: ~a~%"
-                  rule prev-object)
-          (let ((current-field (rule:field rule)))
-            (if (equal? current-field field)
-                (let ((action     (rule:action rule))
-                      (parameters (rule:parameters rule)))
-                  (cond
-                   ((equal? action 'dump)
-                    (pretty-print prev-object)
-                    prev-object)
-                   ((equal? action 'replace)
-                    parameters)
-                   ((procedure? action)
-                    (action chain prev-object))
-                   (else
-                    (error "Unknown action" action))))
-                prev-object)))
-        object
-        chain))
 
 
 

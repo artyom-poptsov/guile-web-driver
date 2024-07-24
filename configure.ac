@@ -59,6 +59,7 @@ AC_CONFIG_FILES([
         web/Makefile
         web/driver/Makefile
         web/proxy/Makefile
+        web/proxy/interceptor/Makefile
         tests/Makefile
 ])
 
