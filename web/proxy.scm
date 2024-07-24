@@ -38,6 +38,7 @@
   #:use-module (web response)
   #:use-module (web server)
   #:use-module (web proxy connection)
+  #:use-module (web proxy interceptor)
   #:export (<proxy>
             proxy?
             proxy-port
@@ -91,30 +92,17 @@
    #:init-value   (make-hash-table 10)
    #:getter       proxy-connections)
 
-  ;; An associative list of headers to replace for the interceptor.
-  ;;
-  ;; <list>
-  (headers
+  ;; <proxy-interceptor>
+  (interceptor
    #:init-value   #f
-   #:init-keyword #:headers
-   #:getter       proxy-headers))
+   #:init-keyword #:interceptor
+   #:getter       proxy-interceptor))
 
 
 
 (define-method (proxy? x)
   "Predicate.  Check if X is a <proxy> instance."
   (is-a? x <proxy>))
-
-
-;; TODO: This is for debugging.  Implement proper logging instead.
-(define mtx (make-mutex 'recursive))
-(define (format dest fmt . args)
-  (lock-mutex mtx)
-  (apply (@@ (guile) format)
-         dest
-         (string-append ";;; " fmt)
-         args)
-  (unlock-mutex mtx))
 
 
 
@@ -173,78 +161,11 @@
     (bind s AF_INET (proxy-address proxy) (proxy-port proxy))
     (listen s (proxy-backlog proxy))))
 
-(define (import-key import-proc file)
-  "Import a key FILE using a procedure IMPORT-PROC, return the imported key."
-  (let* ((raw (get-bytevector-all (open-input-file file))))
-    (import-proc raw x509-certificate-format/pem)))
-
 (define-method (proxy-intercept (proxy <proxy>)
                                 (connection <proxy-connection>))
   "Intercept the traffic coming through a PROXY, replace HTTP headers on the way."
-  (unless (proxy-connection-tls-session connection)
-    (let ((server (make-session connection-end/server))
-          (client-port (proxy-connection-client-port connection))
-          (target-port (proxy-connection-target-port connection))
-          (pub    (import-key import-x509-certificate
-                              "cert/cert.pem"))
-          (sec    (import-key import-x509-private-key
-                              "cert/key.pem")))
-
-      (format (current-error-port) "pub: ~S; sec: ~S~%" pub sec)
-
-      (set-session-priorities! server
-                               "NORMAL:+ARCFOUR-128:+CTYPE-X509")
-
-      ;; Specify the underlying transport socket.
-      (set-session-transport-fd! server (fileno client-port))
-
-      ;; Create anonymous credentials.
-      (let ((cred (make-certificate-credentials)))
-        (set-certificate-credentials-x509-keys! cred
-                                                (list pub)
-                                                sec)
-        (set-session-credentials! server cred))
-
-      ;; Perform the TLS handshake with the client.
-      (handshake server)
-      (proxy-connection-tls-session-set! connection server)))
-
-  ;; Receive data over the TLS record layer.
-  (let* ((server         (proxy-connection-tls-session connection))
-         (origin-request (catch #t
-                           (lambda ()
-                             (read-request (session-record-port server)))
-                           (lambda (key . args)
-                             (format (current-error-port)
-                                     "ERROR: ~a: ~a~%" key args)
-                             #f))))
-    (if origin-request
-        (let* ((origin-uri (request-uri origin-request))
-               (uri        (build-uri 'https
-                                      #:host (proxy-connection-host connection)
-                                      #:port (proxy-connection-port connection)
-                                      #:path (uri-path origin-uri)
-                                      #:query (uri-query origin-uri)))
-               (headers    (proxy-headers proxy)))
-          (format #t "received the following message: ~a~%"
-                  origin-request)
-          (format #t "uri: ~a~%"
-                  uri)
-          (receive (response response-body)
-              (http-request uri
-                            #:method (request-method origin-request)
-                            #:version (request-version origin-request)
-                            #:headers (if headers
-                                          headers
-                                          (request-headers origin-request))
-                            #:decode-body? #f)
-            (write-response response (session-record-port server))
-            (put-bytevector (session-record-port server)
-                            response-body)
-            (force-output (session-record-port server))
-            (bye server close-request/rdwr)))
-        (begin
-          (close (proxy-connection-client-port connection))))))
+  (let ((interceptor (proxy-interceptor proxy)))
+    (proxy-interceptor-run interceptor connection)))
 
 (define-method (transfer-data (proxy <proxy>) (connection <proxy-connection>))
   "Transfer data through a PROXY."

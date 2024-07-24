@@ -26,11 +26,24 @@
 
 (define-module (web proxy common)
   #:use-module (oop goops)
+  #:use-module (ice-9 threads)
   #:use-module (rnrs bytevectors)
-  #:export (object-address/hex-string))
+  #:export (object-address/hex-string
+            format))
 
 
 (define (object-address/hex-string object)
   (number->string (object-address object) 16))
+
+
+;; TODO: This is for debugging.  Implement proper logging instead.
+(define mtx (make-mutex 'recursive))
+(define (format dest fmt . args)
+  (lock-mutex mtx)
+  (apply (@@ (guile) format)
+         dest
+         (string-append ";;; " fmt)
+         args)
+  (unlock-mutex mtx))
 
 ;;; common.scm ends here.

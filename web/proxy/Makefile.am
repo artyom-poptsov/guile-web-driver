@@ -21,7 +21,8 @@ include $(top_srcdir)/build-aux/am/guile.am
 
 SOURCES = \
 	common.scm \
-	connection.scm
+	connection.scm	\
+	interceptor.scm
 
 moddir=$(prefix)/share/guile/site/$(GUILE_EFFECTIVE_VERSION)/web/proxy/
 godir=$(libdir)/guile/$(GUILE_EFFECTIVE_VERSION)/site-ccache/web/proxy/
