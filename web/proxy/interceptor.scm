@@ -192,61 +192,46 @@ INTERCEPTOR.  Return two values: a X509 certificate and a private key."
     (handshake server)
     (proxy-connection-tls-session-set! connection server)))
 
+(define-method (chain-run (chain <top>)
+                          (field <symbol>)
+                          (accessor <procedure>)
+                          (message <top>))
+  "Run an interceptor CHAIN for a given FIELD.  Return forged field or the
+original field if a CHAIN is #f."
+  (if chain
+      (chain-run chain field (accessor message))
+      (accessor message)))
+
 (define-method (proxy-interceptor-run (interceptor <proxy-interceptor>)
                                       (connection <proxy-connection>))
   (unless (proxy-connection-tls-session connection)
     (proxy-interceptor-make-session! interceptor connection))
 
   ;; Receive data over the TLS record layer.
-  (let* ((server         (proxy-connection-tls-session connection))
-         (origin-request (catch #t
-                           (lambda ()
-                             (read-request (session-record-port server)))
-                           (lambda (key . args)
-                             (format (current-error-port)
-                                     "ERROR: ~a: ~a~%" key args)
-                             #f)))
-         (scenario       (proxy-interceptor-chain interceptor)))
-    (if origin-request
+  (let* ((server  (proxy-connection-tls-session connection))
+         (request (catch #t
+                    (lambda ()
+                      (read-request (session-record-port server)))
+                    (lambda (key . args)
+                      (format (current-error-port)
+                              "ERROR: ~a: ~a~%" key args)
+                      #f)))
+         (scenario (proxy-interceptor-chain interceptor)))
+    (if request
         (let* ((request-chain  (chain-select scenario 'request))
                (response-chain (chain-select scenario 'response))
-               (method
-                (if request-chain
-                    (chain-run request-chain
-                               'method
-                               (request-method origin-request))
-                    (request-method origin-request)))
-               (uri
-                (if request-chain
-                    (chain-run request-chain
-                               'uri
-                               (request-uri origin-request))
-                    (request-uri origin-request)))
-               (version
-                (if request-chain
-                    (chain-run request-chain
-                               'version
-                               (request-version origin-request))
-                    (request-version origin-request)))
-               (headers
-                (if request-chain
-                    (chain-run request-chain
-                               'headers
-                               (request-headers origin-request))
-                    (request-headers origin-request)))
-               (meta
-                (if request-chain
-                    (chain-run request-chain
-                               'meta
-                               (request-meta origin-request))
-                    (request-meta origin-request)))
+               (method  (chain-run request-chain 'method request-method request))
+               (uri     (chain-run request-chain 'uri request-uri request))
+               (version (chain-run request-chain 'version request-version request))
+               (headers (chain-run request-chain 'headers request-headers request))
+               (meta    (chain-run request-chain 'meta    request-meta request))
                (uri        (build-uri 'https
                                       #:host (proxy-connection-host connection)
                                       #:port (proxy-connection-port connection)
                                       #:path (uri-path uri)
                                       #:query (uri-query uri))))
           (format #t "received the following message: ~a~%"
-                  origin-request)
+                  request)
           (format #t "uri: ~a~%"
                   uri)
           (receive (response response-body)
