@@ -10,6 +10,8 @@ The client implements most of the webdriver [specification](https://www.w3.org/T
 
 - [GNU Guile](https://www.gnu.org/software/guile/) version 2.2 or later.
 - [Guile-JSON](https://github.com/aconchillo/guile-json) library.
+- [Guile-GnuTLS](https://www.gnutls.org/manual/gnutls-guile.html) -- required
+  for intercepting proxy to work.
 - Optional `chromedriver` command and either Chrome or Chromium browser.
   Some distribution (arch) install chromedriver as part of chromium package, 
   some others (debian) provide a separate package (chromium-driver).
