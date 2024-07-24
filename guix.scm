@@ -57,31 +57,34 @@
 (define %source-dir (dirname (current-filename)))
 
 
-(package
-  (name "guile-web-driver-ng")
-  (version "git")
-  (source (local-file %source-dir
-                      #:recursive? #t
-                      #:select? (git-predicate %source-dir)))
-    (build-system gnu-build-system)
-    (native-inputs
-     (list autoconf
-           automake
-           pkg-config
-           texinfo
-           ;; needed when cross-compiling.
-           guile-gnutls
-           guile-3.0))
-    (inputs (list guile-3.0))
-    (propagated-inputs (list guile-json-4))
-    (home-page "https://github.com/artyom-poptsov/guile-web-driver-ng")
-    (synopsis "Web driver (Selenium) client for Guile")
-    (description
-     "This is a web-driver, or Selenium 2, client.  It's purpose is to automate
+(define guile-web-driver-ng
+  (package
+   (name "guile-web-driver-ng")
+   (version "git")
+   (source (local-file %source-dir
+                       #:recursive? #t
+                       #:select? (git-predicate %source-dir)))
+   (build-system gnu-build-system)
+   (native-inputs
+    (list autoconf
+          automake
+          pkg-config
+          texinfo
+          ;; needed when cross-compiling.
+          guile-gnutls
+          guile-3.0))
+   (inputs (list guile-3.0))
+   (propagated-inputs (list guile-json-4))
+   (home-page "https://github.com/artyom-poptsov/guile-web-driver-ng")
+   (synopsis "Web driver (Selenium) client for Guile")
+   (description
+    "This is a web-driver, or Selenium 2, client.  It's purpose is to automate
 browsers, specifically for automatic web server testing.  Chrome or Firefox
 can be used as the automated browsers, or it can connect to arbitrary server
 providing webdriver interface.  The client implements most of the webdriver
 @url{https://www.w3.org/TR/webdriver2/, specification}.")
-    (license gpl3+))
+   (license gpl3+)))
+
+guile-web-driver-ng
 
 ;;; guix.scm ends here.
