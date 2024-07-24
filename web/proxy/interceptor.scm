@@ -1,3 +1,43 @@
+;;; proxy.scm -- Selenium WebDriver Interceptor.
+
+;; Copyright (C) 2024 Artyom V. Poptsov <poptsov.artyom@gmail.com>
+;;
+;; This program is free software: you can redistribute it and/or modify it
+;; under the terms of the GNU General Public License as published by the Free
+;; Software Foundation, version 3.
+;;
+;; The program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with the program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+;;; Commentary:
+
+;; This module describes a proxy interceptor that can be used to intercept
+;; HTTPS traffic between a client and a server (given that a client is allowed
+;; to accept forged X509 certificate. of course.)
+;;
+;; Usage example:
+;;   (let* ((interceptor
+;;           (make <proxy-interceptor>
+;;              #:chain '((request headers dump stderr)
+;;                        (request headers replace
+;;                                 ((host "example.com" . #f)
+;;                                  (user-agent . "curl/8.5.0")
+;;                                  (accept (*/*)))))))
+;;          (proxy (make <proxy>
+;;                   #:port 8081
+;;                   #:interceptor interceptor)))
+;;     (proxy-start! proxy)
+;;     (while #t (sleep 5)))
+
+
+;;; Code:
+
 (define-module (web proxy interceptor)
   #:use-module (oop goops)
   #:use-module (ice-9 receive)
