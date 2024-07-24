@@ -71,11 +71,14 @@
           pkg-config
           texinfo
           ;; needed when cross-compiling.
-          guile-json-3
+          guile-json-4
           guile-gnutls
           guile-3.0))
-   (inputs (list guile-3.0))
-   (propagated-inputs (list guile-json-4))
+   (propagated-inputs
+    (list
+     guile-json-4
+     guile-gnutls
+     guile-3.0))
    (home-page "https://github.com/artyom-poptsov/guile-web-driver-ng")
    (synopsis "Web driver (Selenium) client for Guile")
    (description
