@@ -8,22 +8,19 @@ The client implements most of the webdriver [specification](https://www.w3.org/T
 
 ### Requirements
 
-- guile version 2.2
-- guile-json library from http://download.savannah.gnu.org/releases/guile-json/guile-json-4.7.3.tar.gz
-- Optional chromedriver command and either chrome or chromium browser.
+- [GNU Guile](https://www.gnu.org/software/guile/) version 2.2 or later.
+- [Guile-JSON](https://github.com/aconchillo/guile-json) library.
+- Optional `chromedriver` command and either Chrome or Chromium browser.
   Some distribution (arch) install chromedriver as part of chromium package, 
   some others (debian) provide a separate package (chromium-driver).
-  Required for unit tests.
 - Optional [geckodriver](https://github.com/mozilla/geckodriver/) and mozilla firefox browser.
-  Required for unit tests.
-- Optionally for unit testing, hdt library is required from https://github.com/her01n/hdt
 
 ### Installation
 
 The manual installation process looks like follows:
 ```
-git clone https://github.com/her01n/guile-web-driver.git
-cd guile-web-driver
+git clone https://github.com/her01n/guile-web-driver-ng.git
+cd guile-web-driver-ng
 autoreconf -vif
 ./configure --prefix=/usr
 make -j$(nproc)
