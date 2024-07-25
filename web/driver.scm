@@ -38,7 +38,8 @@
   #:use-module (web response)
   #:use-module (web server)
   #:use-module (web driver common)
-  #:use-module (web driver element))
+  #:use-module (web driver element)
+  #:use-module (web driver javascript))
 
 
 (define %server-address INADDR_LOOPBACK)
@@ -561,32 +562,6 @@ localhost:8080."
 
 (define-public-with-driver (page-source driver)
   (session-command driver 'GET "/source"))
-
-(define (scm->javascript value)
-  (match value
-    (#t #t)
-    (#f #f)
-    (#nil 'null)
-    ((? number? n) n)
-    ((? string? s) s)
-    (('web-driver-element driver handle)
-     `(("element-6066-11e4-a52e-4f735466cecf" . ,handle)))
-    ((? list? l) (list->vector (map scm->javascript l)))))
-
-(define (javascript->scm driver value)
-  (match value
-    (#t #t)
-    (#f #f)
-    (#nil #nil)
-    ('null #nil)
-    ((? number? n) n)
-    ((? string? s) s)
-    ((? element-object? r) (web-driver-element driver r))
-    ((? vector? v) (map (lambda (value) (javascript->scm driver value)) (vector->list v)))
-    ((? list? l)
-     (alist->hash-table
-      (map (lambda (key . value) (cons key (javascript->scm driver value)))
-           l)))))
 
 (define (execute driver path body arguments)
   (let ((js-args (map scm->javascript arguments)))
