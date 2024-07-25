@@ -4,7 +4,8 @@
   #:use-module (ice-9 match)
   #:export (hash-table->alist
             to-assoc-list
-            request-body->bytevector))
+            request-body->bytevector
+            fold-null))
 
 
 
@@ -20,5 +21,10 @@
 (define (request-body->bytevector body-string)
   "Convert a request BODY-STRING into a bytevector.  Return the bytevector."
   (string->bytevector body-string "utf-8"))
+
+(define (fold-null json)
+  (match json
+    ('null #f)
+    (x x)))
 
 ;;; common.scm ends here.

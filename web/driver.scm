@@ -477,11 +477,6 @@ localhost:8080."
 (define-public (selected? element)
   (element-command element 'GET "/selected" #f))
 
-(define (fold-null json)
-  (match json
-    ('null #f)
-    (x x)))
-
 (define-public (attribute element name)
   (fold-null (element-command element 'GET (format #f "/attribute/~a" name) #f)))
 
