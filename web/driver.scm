@@ -39,6 +39,7 @@
   #:use-module (web server)
   #:use-module (web driver common)
   #:use-module (web driver element)
+  #:use-module (web driver rect)
   #:use-module (web driver javascript))
 
 
@@ -336,18 +337,6 @@ localhost:8080."
 
 (define-public-with-driver (switch-to-window driver)
   (session-command driver 'POST "/frame" '(("id" . null))))
-
-;;; Rectangle Record
-
-(define-record-type <rect>
-  (make-rect x y width height)
-  rect?
-  (x       rect-x)
-  (y       rect-y)
-  (width   rect-width)
-  (height  rect-height))
-
-(export make-rect rect? rect-x rect-y rect-width rect-height)
 
 ;;; Resizing and Positioning Windows
 
