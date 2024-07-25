@@ -73,22 +73,23 @@ localhost:8080."
             (list #:socket server-socket)))))))
 
 (define (request method uri body-scm)
-  (define body-string (scm->json-string body-scm))
-  (define body-bytevector (and body-scm (request-body->bytevector body-string)))
-  (call-with-values
-      (lambda ()
-        (http-request uri #:method method #:body body-bytevector))
-    (lambda (response body)
-      (let ((value (assoc-ref (json-string->scm (bytevector->string body "utf-8"))
-                              "value")))
-        (if (equal? 200 (response-code response))
-            value
-            (let ((error (assoc-ref value "error"))
-                  (message (assoc-ref value "message")))
-              (throw 'web-driver-error
-                     (format #f "~a ~a.\nRequest: ~a ~a\nBody: ~a\nError: ~a\nMessage: ~a\n"
-                             (response-code response) (response-reason-phrase response)
-                             method uri body-string error message))))))))
+  (let* ((body-string (scm->json-string body-scm))
+         (body-bytevector (and body-scm
+                               (request-body->bytevector body-string))))
+    (call-with-values
+        (lambda ()
+          (http-request uri #:method method #:body body-bytevector))
+      (lambda (response body)
+        (let ((value (assoc-ref (json-string->scm (bytevector->string body "utf-8"))
+                                "value")))
+          (if (equal? 200 (response-code response))
+              value
+              (let ((error (assoc-ref value "error"))
+                    (message (assoc-ref value "message")))
+                (throw 'web-driver-error
+                       (format #f "~a ~a.\nRequest: ~a ~a\nBody: ~a\nError: ~a\nMessage: ~a\n"
+                               (response-code response) (response-reason-phrase response)
+                               method uri body-string error message)))))))))
 
 (define (close-driver-pipe pipe)
   (kill (hashq-ref port/pid-table pipe) SIGTERM)
