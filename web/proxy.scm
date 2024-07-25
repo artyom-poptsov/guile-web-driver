@@ -44,7 +44,6 @@
             proxy-port
             proxy-socket
             proxy-connections
-            proxy-headers
 
             proxy-start!
             proxy-stop!
