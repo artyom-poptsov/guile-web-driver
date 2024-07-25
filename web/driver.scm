@@ -37,7 +37,8 @@
   #:use-module (web request)
   #:use-module (web response)
   #:use-module (web server)
-  #:use-module (web driver common))
+  #:use-module (web driver common)
+  #:use-module (web driver element))
 
 
 (define %server-address INADDR_LOOPBACK)
@@ -390,23 +391,6 @@ localhost:8080."
   (set-window-rect driver 'null 'null 'null 'null))
 
 ;;; Elements
-
-;; XXX elements are returned as a json object with a single weird key with
-;; value of the actual element id/reference
-(define (web-driver-element driver element-object)
-  (list
-   'web-driver-element driver
-   (assoc-ref element-object "element-6066-11e4-a52e-4f735466cecf")))
-
-(define (element? value)
-  (match value
-    (('web-driver-element driver element) #t)
-    (_ #f)))
-
-(define (element-object? element-object)
-  (and
-   (list? element-object)
-   (assoc-ref element-object "element-6066-11e4-a52e-4f735466cecf")))
 
 (define (element-command element method path body-scm)
   (match element

@@ -21,6 +21,7 @@ include $(top_srcdir)/build-aux/am/guile.am
 
 SOURCES = \
 	common.scm	\
+	element.scm	\
 	key.scm
 
 moddir=$(prefix)/share/guile/site/$(GUILE_EFFECTIVE_VERSION)/web/driver/
