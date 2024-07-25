@@ -31,7 +31,8 @@
             rect-x
             rect-y
             rect-width
-            rect-height))
+            rect-height
+            result->rect))
 
 
 
@@ -42,5 +43,12 @@
   (y       rect-y)
   (width   rect-width)
   (height  rect-height))
+
+(define (result->rect result)
+  (let* ((x (assoc-ref result "x"))
+         (y (assoc-ref result "y"))
+         (width (assoc-ref result "width"))
+         (height (assoc-ref result "height")))
+    (make-rect x y width height)))
 
 ;;; rect.scm ends here.

@@ -340,13 +340,6 @@ localhost:8080."
 
 ;;; Resizing and Positioning Windows
 
-(define (result->rect result)
-  (let* ((x (assoc-ref result "x"))
-         (y (assoc-ref result "y"))
-         (width (assoc-ref result "width"))
-         (height (assoc-ref result "height")))
-    (make-rect x y width height)))
-
 (define-public-with-driver (window-rect driver)
   (result->rect (session-command driver 'GET "/window/rect")))
 
