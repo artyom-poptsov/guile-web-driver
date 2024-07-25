@@ -1,8 +1,6 @@
-(define-module (web driver key))
-
-(use-modules 
-  (ice-9 match)
-  (srfi srfi-1))
+(define-module (web driver key)
+  #:use-module (ice-9 match)
+  #:use-module (srfi srfi-1))
 
 (define-public (key->unicode-char code)
   (if (equal? 1 (string-length code))
