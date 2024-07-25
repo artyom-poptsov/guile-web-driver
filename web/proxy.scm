@@ -195,7 +195,6 @@
 (define (forward-request proxy connection request body)
   (let* ((client-socket (proxy-connection-client-port connection))
          (headers       (request-headers request))
-         (headers       (cons '(Test-Header . "test") headers))
          (method        (request-method request))
          (uri           (request-uri request))
          (host          (symbol->string (uri-scheme uri)))
