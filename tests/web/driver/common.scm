@@ -19,6 +19,10 @@
     (hash-set! ht 'b 2)
     (to-assoc-list ht)))
 
+(test-equal "request-body->bytevector"
+  #vu8(104 101 108 108 111)
+  (request-body->bytevector "hello"))
+
 
 (define exit-status (test-runner-fail-count (test-runner-current)))
 

@@ -1,8 +1,10 @@
 (define-module (web driver common)
   #:use-module (ice-9 hash-table)
+  #:use-module (ice-9 iconv)
   #:use-module (ice-9 match)
   #:export (hash-table->alist
-            to-assoc-list))
+            to-assoc-list
+            request-body->bytevector))
 
 
 
@@ -14,5 +16,9 @@
     ((? list? list) list)
     ((? hash-table? hash) (hash-table->alist hash))
     (#f (list))))
+
+(define (request-body->bytevector body-string)
+  "Convert a request BODY-STRING into a bytevector.  Return the bytevector."
+  (string->bytevector body-string "utf-8"))
 
 ;;; common.scm ends here.

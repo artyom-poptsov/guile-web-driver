@@ -50,10 +50,6 @@
 
 
 
-(define (request-body->bytevector body-string)
-  "Convert a request BODY-STRING into a bytevector.  Return the bytevector."
-  (string->bytevector body-string "utf-8"))
-
 (define-public (set-web-handler! handler)
   "Sets the current handler for the testing web server listening on
 localhost:8080."
