@@ -23,13 +23,20 @@
 
 ;;; Code:
 
-(define-module (web driver))
-
-(use-modules
- (ice-9 hash-table) (ice-9 iconv) (ice-9 match) (ice-9 popen) (ice-9 threads)
- (json)
- (srfi srfi-1) (srfi srfi-9) (srfi srfi-27)
- (web client) (web request) (web response) (web server))
+(define-module (web driver)
+  #:use-module (ice-9 hash-table)
+  #:use-module (ice-9 iconv)
+  #:use-module (ice-9 match)
+  #:use-module (ice-9 popen)
+  #:use-module (ice-9 threads)
+  #:use-module (srfi srfi-1)
+  #:use-module (srfi srfi-9)
+  #:use-module (srfi srfi-27)
+  #:use-module (json)
+  #:use-module (web client)
+  #:use-module (web request)
+  #:use-module (web response)
+  #:use-module (web server))
 
 
 (define %server-address INADDR_LOOPBACK)
