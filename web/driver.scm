@@ -36,7 +36,8 @@
   #:use-module (web client)
   #:use-module (web request)
   #:use-module (web response)
-  #:use-module (web server))
+  #:use-module (web server)
+  #:use-module (web driver common))
 
 
 (define %server-address INADDR_LOOPBACK)
@@ -93,15 +94,6 @@ localhost:8080."
 (define (close-driver-pipe pipe)
   (kill (hashq-ref port/pid-table pipe) SIGTERM)
   (close-pipe pipe))
-
-(define (hash-table->alist hash)
-  (hash-fold (lambda (key value alist) (cons (cons key value) alist)) (list) hash))
-
-(define (to-assoc-list scm)
-  (match scm
-    ((? list? list) list)
-    ((? hash-table? hash) (hash-table->alist hash))
-    (#f (list))))
 
 (define (capabilities->parameters capabilities)
   `(("capabilities" .
