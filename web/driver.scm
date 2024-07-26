@@ -44,7 +44,8 @@
   #:use-module (web driver rect)
   #:use-module (web driver javascript)
   #:use-module (web driver cookie)
-  #:use-module (web driver key))
+  #:use-module (web driver key)
+  #:export (open-web-driver))
 
 
 (define %server-address INADDR_LOOPBACK)
@@ -166,33 +167,32 @@ localhost:8080."
 
 (define *default-driver* (make-thread-local-fluid))
 
-(define-public open-web-driver
-  (lambda* (#:key browser url headless capabilities)
-    (define driver
-      (match (list browser url)
-        ((#f (? identity url))
-         (if (not headless)
-             (open* url (const #f) capabilities)
-             (error:not-implemented
-              "#:headless not supported when connecting to an url.")))
-        (((or #f 'chrome 'chromium 'chromedriver) #f)
-         (if (not headless)
-             (open-chromedriver capabilities)
-             (error:not-implemented
-              "#:headless not supported for chromedriver.")))
-        (((or 'firefox 'geckodriver) #f)
-         (open-geckodriver (if headless
-                               (add-firefox-headless capabilities)
-                               capabilities)))
-        (('headless-firefox #f)
-         (open-web-driver #:browser 'firefox
-                          #:headless #t
-                          #:capabilities capabilities))
-        (((? identity browser) (? identity url))
-         (error:invalid-arguments
-          "Only one of #:browser and #:url may be specified"))
-        ((browser #f)
-         (error:unknown-browser browser))))
+(define* (open-web-driver #:key browser url headless capabilities)
+  (let ((driver
+         (match (list browser url)
+           ((#f (? identity url))
+            (when headless
+              (error:not-implemented
+               "#:headless not supported when connecting to an url."))
+            (open* url (const #f) capabilities))
+           (((or #f 'chrome 'chromium 'chromedriver) #f)
+            (when headless
+              (error:not-implemented
+               "#:headless not supported for chromedriver."))
+            (open-chromedriver capabilities))
+           (((or 'firefox 'geckodriver) #f)
+            (open-geckodriver (if headless
+                                  (add-firefox-headless capabilities)
+                                  capabilities)))
+           (('headless-firefox #f)
+            (open-web-driver #:browser 'firefox
+                             #:headless #t
+                             #:capabilities capabilities))
+           (((? identity browser) (? identity url))
+            (error:invalid-arguments
+             "Only one of #:browser and #:url may be specified"))
+           ((browser #f)
+            (error:unknown-browser browser)))))
     (unless (fluid-ref *default-driver*)
       (fluid-set! *default-driver* driver))
     driver))
