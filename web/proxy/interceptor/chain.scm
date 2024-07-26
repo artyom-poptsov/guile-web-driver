@@ -49,12 +49,12 @@
 
 (define-method (chain-select (chain <list>) (type <symbol>))
   "Select all the chains of the TYPE from a SCENARIO."
-  (fold (lambda (rule prev)
-          (if (equal? (rule:type rule) type)
-              (cons rule prev)
-              prev))
-        '()
-        chain))
+  (reverse (fold (lambda (rule prev)
+                   (if (equal? (rule:type rule) type)
+                       (cons rule prev)
+                       prev))
+                 '()
+                 chain)))
 
 (define-method (chain-run (chain <list>) (field <symbol>) object)
   "Run an interceptor CHAIN for a FIELD on an OBJECT (the field value.)"

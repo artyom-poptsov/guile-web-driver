@@ -11,6 +11,7 @@
 
 (define %rule-1 '(request method dump stdout))
 (define %rule-2 '(response method dump stdout))
+(define %rule-3 '(request method replace "POST"))
 (define %chain-1 `(,%rule-1 ,%rule-2))
 
 (test-equal "rule:type"
@@ -40,6 +41,14 @@
       (chain-run (chain-select %chain-1 'request)
                  'method
                  "test"))))
+
+(test-equal "chain-run: replace"
+  "\"POST\"\n"
+  (with-output-to-string
+    (lambda ()
+      (let ((chain (chain-select `(,%rule-3 ,%rule-2 ,%rule-1)
+                                 'request)))
+        (chain-run chain 'method "GET")))))
 
 
 (define exit-status (test-runner-fail-count (test-runner-current)))
