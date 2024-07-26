@@ -38,6 +38,7 @@
   #:use-module (web response)
   #:use-module (web server)
   #:use-module (web driver common)
+  #:use-module ((web driver error) #:prefix error:)
   #:use-module (web driver element)
   #:use-module (web driver rect)
   #:use-module (web driver javascript))
@@ -86,10 +87,10 @@ localhost:8080."
               value
               (let ((error (assoc-ref value "error"))
                     (message (assoc-ref value "message")))
-                (throw 'web-driver-error
-                       (format #f "~a ~a.\nRequest: ~a ~a\nBody: ~a\nError: ~a\nMessage: ~a\n"
-                               (response-code response) (response-reason-phrase response)
-                               method uri body-string error message)))))))))
+                (error:web-driver-error
+                 "~a ~a.\nRequest: ~a ~a\nBody: ~a\nError: ~a\nMessage: ~a\n"
+                 (response-code response) (response-reason-phrase response)
+                 method uri body-string error message))))))))
 
 (define (close-driver-pipe pipe)
   (kill (hashq-ref port/pid-table pipe) SIGTERM)
@@ -169,12 +170,13 @@ localhost:8080."
         ((#f (? identity url))
          (if (not headless)
              (open* url (const #f) capabilities)
-             (throw 'not-implemented
-                    "#:headless not supported when connecting to an url.")))
+             (error:not-implemented
+              "#:headless not supported when connecting to an url.")))
         (((or #f 'chrome 'chromium 'chromedriver) #f)
          (if (not headless)
              (open-chromedriver capabilities)
-             (throw 'not-implemented "#:headless not supported for chromedriver.")))
+             (error:not-implemented
+              "#:headless not supported for chromedriver.")))
         (((or 'firefox 'geckodriver) #f)
          (open-geckodriver (if headless
                                (add-firefox-headless capabilities)
@@ -184,11 +186,10 @@ localhost:8080."
                           #:headless #t
                           #:capabilities capabilities))
         (((? identity browser) (? identity url))
-         (throw 'invalid-arguments
-                "Only one of #:browser and #:url may be specified"))
+         (error:invalid-arguments
+          "Only one of #:browser and #:url may be specified"))
         ((browser #f)
-         (throw 'unknown-browser
-                (format #f "The browser ~a is not supported." browser)))))
+         (error:unknown-browser browser))))
     (if (not (fluid-ref *default-driver*))
         (fluid-set! *default-driver* driver))
     driver))
@@ -529,9 +530,9 @@ localhost:8080."
    (cond
     ((element? target) target)
     ((string? target) (element-by-label-text driver target))
-    (else (throw 'illegal-argument
-                 "target of send-keys must be either element or string: ~a"
-                 target)))
+    (else (error:invalid-arguments
+           "target of send-keys must be either element or string"
+           target)))
    'POST "/value" `(("text" . ,text))))
 
 (define-public-with-driver (choose-file driver target path)

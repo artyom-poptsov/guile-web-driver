@@ -21,6 +21,7 @@ include $(top_srcdir)/build-aux/am/guile.am
 
 SOURCES = \
 	common.scm	\
+	error.scm	\
 	rect.scm	\
 	element.scm	\
 	javascript.scm	\
