@@ -1,0 +1,7 @@
+# -*- shell-script -*-
+
+# Generated files
+*.info
+
+stamp-vti
+version.texi

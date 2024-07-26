@@ -18,7 +18,7 @@
 
 ACLOCAL_AMFLAGS = -I build-aux
 
-SUBDIRS = build-aux web tests
+SUBDIRS = build-aux web tests doc
 
 EXTRA_DIST = \
 	.dir-locals.el

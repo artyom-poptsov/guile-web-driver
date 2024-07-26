@@ -1,0 +1,20 @@
+@c -*-texinfo-*-
+@c This file is part of Guile-Web-Driver-NG Reference Manual.
+@c Copyright (C) 2024 Artyom V. Poptsov
+@c See the file guile-web-driver-ng.texi for copying conditions.
+
+@page
+@node Type Index
+@unnumbered Type Index
+
+@printindex tp
+
+@node Procedure Index
+@unnumbered Procedure Index
+
+@printindex fn
+
+@node Concept Index
+@unnumbered Concept Index
+
+@printindex cp
