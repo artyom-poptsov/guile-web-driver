@@ -2,6 +2,7 @@ SCM_TESTS = \
 	web/driver/common.scm		\
 	web/driver/element.scm		\
 	web/driver/javascript.scm	\
+	web/driver/rect.scm		\
 	web/proxy/common.scm		\
 	web/proxy/connection.scm	\
 	web/proxy/interceptor.scm	\
