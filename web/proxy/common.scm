@@ -1,6 +1,6 @@
 ;;; common.scm -- Common Guile-Web-Driver-NG proxy procedures.
 
-;; Copyright (C) 2022-2023 Artyom V. Poptsov <poptsov.artyom@gmail.com>
+;; Copyright (C) 2024 Artyom V. Poptsov <poptsov.artyom@gmail.com>
 ;;
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
 ;;
 ;; You should have received a copy of the GNU General Public License
 ;; along with the program.  If not, see <http://www.gnu.org/licenses/>.
+
 
 
 ;;; Commentary:

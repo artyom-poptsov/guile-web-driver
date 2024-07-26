@@ -6,6 +6,14 @@ Chrome or Firefox can be used as the automated browsers,
 or it can connect to arbitrary server providing webdriver interface.
 The client implements most of the webdriver [specification](https://www.w3.org/TR/webdriver2/).
 
+### License
+Guile-Web-Driver-NG is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the Free
+Software Foundation, either version 3 of the License, or (at your option) any
+later version.  Please see =COPYING= file for the terms of GNU General Public
+License.
+
+
 ### Requirements
 
 - [GNU Guile](https://www.gnu.org/software/guile/) version 2.2 or later.
