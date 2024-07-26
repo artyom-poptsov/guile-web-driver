@@ -50,6 +50,7 @@
   #:use-module (web response)
   #:use-module (web uri)
   #:use-module (web proxy common)
+  #:use-module (web proxy config)
   #:use-module (web proxy connection)
   #:use-module (web proxy interceptor chain)
   #:export (<proxy-interceptor>
@@ -58,15 +59,6 @@
             proxy-interceptor-x509-certificate-file
             proxy-interceptor-x509-private-key-file
             proxy-interceptor-run))
-
-
-;; TODO: Generate the paths to files dynamically.
-
-(define %default-x509-certificate-file
-  "cert/cert.pem")
-
-(define %default-x509-private-key-file
-  "cert/key.pem")
 
 
 (define-class <proxy-interceptor> ()
