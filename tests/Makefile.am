@@ -6,6 +6,7 @@ SCM_TESTS = \
 	web/driver/cookie.scm		\
 	web/proxy/common.scm		\
 	web/proxy/connection.scm	\
+	web/proxy/interceptor/chain.scm	\
 	web/proxy/interceptor.scm	\
 	web/proxy.scm
 
