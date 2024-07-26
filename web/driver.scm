@@ -122,11 +122,11 @@ localhost:8080."
 
 (define (free-listen-port)
   "Find an unused port for server to listen on it"
-  (define s (socket PF_INET SOCK_STREAM 0))
-  (listen s 1)
-  (let ((port (array-ref (getsockname s) 2)))
-    (close-port s)
-    port))
+  (let ((s (socket PF_INET SOCK_STREAM 0)))
+    (listen s 1)
+    (let ((port (array-ref (getsockname s) 2)))
+      (close-port s)
+      port)))
 
 
 (define (launch-and-open command args capabilities)
