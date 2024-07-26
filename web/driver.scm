@@ -218,10 +218,11 @@ localhost:8080."
      (finalizer))))
 
 (define-public (close-web-driver . args)
-  (define driver (if (null? args) (fluid-ref *default-driver*) (car args)))
-  (if driver (close driver))
-  (if (equal? driver (fluid-ref *default-driver*))
-      (fluid-set! *default-driver* #f)))
+  (let ((driver (if (null? args) (fluid-ref *default-driver*) (car args))))
+    (if driver
+        (close driver))
+    (if (equal? driver (fluid-ref *default-driver*))
+        (fluid-set! *default-driver* #f))))
 
 (define-public (call-with-web-driver proc)
   (define driver (open-web-driver))
