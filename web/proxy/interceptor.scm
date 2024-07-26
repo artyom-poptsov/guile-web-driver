@@ -189,7 +189,11 @@ INTERCEPTOR.  Return two values: a X509 certificate and a private key."
       (set-session-credentials! server cred))
 
     ;; Perform the TLS handshake with the client.
-    (handshake server)
+    (catch 'gnutls-error
+      (lambda ()
+        (handshake server))
+      (lambda (key . args)
+        (format (current-error-port) "ERROR: ~a: ~a~%" key args)))
     (proxy-connection-tls-session-set! connection server)))
 
 (define-method (chain-run (chain <top>)
