@@ -193,8 +193,8 @@ localhost:8080."
           "Only one of #:browser and #:url may be specified"))
         ((browser #f)
          (error:unknown-browser browser))))
-    (if (not (fluid-ref *default-driver*))
-        (fluid-set! *default-driver* driver))
+    (unless (fluid-ref *default-driver*)
+      (fluid-set! *default-driver* driver))
     driver))
 
 (define-public (web-driver? object)
