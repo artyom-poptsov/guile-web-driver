@@ -42,6 +42,7 @@
   #:use-module (web driver element)
   #:use-module (web driver rect)
   #:use-module (web driver javascript)
+  #:use-module (web driver cookie)
   #:use-module (web driver key))
 
 
@@ -561,33 +562,6 @@ localhost:8080."
   (execute driver "/execute/async" body arguments))
 
 ;;; Cookies
-
-(define-record-type <cookie>
-  (make-cookie name value path domain secure http-only expiry same-site)
-  cookie?
-  (name       cookie-name)
-  (value      cookie-value)
-  (path       cookie-path)
-  (domain     cookie-domain)
-  (secure     cookie-secure)
-  (http-only  cookie-http-only)
-  (expiry     cookie-expire)
-  (same-site  cookie-same-site))
-
-(export
- cookie-name cookie-value cookie-path cookie-domain cookie-secure
- cookie-http-only cookie-expire cookie-same-site)
-
-(define (parse-cookie hash)
-  (make-cookie
-   (assoc-ref hash "name")
-   (assoc-ref hash "value")
-   (or (assoc-ref hash "path") "/")
-   (assoc-ref hash "domain")
-   (assoc-ref hash "secure")
-   (assoc-ref hash "httpOnly")
-   (assoc-ref hash "expiry")
-   (assoc-ref hash "samesite")))
 
 (define-public-with-driver (get-all-cookies driver)
   (map

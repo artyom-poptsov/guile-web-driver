@@ -25,7 +25,8 @@ SOURCES = \
 	rect.scm	\
 	element.scm	\
 	javascript.scm	\
-	key.scm
+	key.scm		\
+	cookie.scm
 
 moddir=$(prefix)/share/guile/site/$(GUILE_EFFECTIVE_VERSION)/web/driver/
 godir=$(libdir)/guile/$(GUILE_EFFECTIVE_VERSION)/site-ccache/web/driver/
