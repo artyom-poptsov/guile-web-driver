@@ -26,6 +26,7 @@
 (define-module (web driver cookie)
   #:use-module (srfi srfi-9)
   #:export (<cookie>
+            make-cookie
             cookie-name
             cookie-value
             cookie-path
