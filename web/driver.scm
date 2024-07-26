@@ -151,13 +151,14 @@ localhost:8080."
 (set! *random-state* (random-state-from-platform))
 
 (define (add-firefox-headless capabilities)
-  (define capabilities' (or capabilities '()))
-  (define firefox-options
-    (or (assoc-ref "moz:firefoxOptions" capabilities') '()))
-  (define args (or (assoc-ref "args" firefox-options) #()))
-  (define args' (list->vector (append (vector->list args) (list "-headless"))))
-  (define firefox-options' (assoc-set! firefox-options "args" args'))
-  (assoc-set! capabilities' "moz:firefoxOptions" firefox-options'))
+  (let* ((capabilities    (or capabilities '()))
+         (firefox-options (or (assoc-ref "moz:firefoxOptions" capabilities)
+                              '()))
+         (args            (or (assoc-ref "args" firefox-options) #()))
+         (args            (list->vector (append (vector->list args)
+                                                (list "-headless"))))
+         (firefox-options (assoc-set! firefox-options "args" args)))
+    (assoc-set! capabilities "moz:firefoxOptions" firefox-options)))
 
 (define *default-driver* (make-thread-local-fluid))
 
