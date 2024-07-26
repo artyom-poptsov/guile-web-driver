@@ -1,15 +1,16 @@
-** guile-web-driver
+* Guile-Web-Driver-NG
 :PROPERTIES:
-:CUSTOM_ID: guile-web-driver
+:CUSTOM_ID: guile-web-driver-ng
 :END:
-This is a web-driver, or selenium 2, client. It's purpose is to automate
-browsers, specifically for automatic web server testing. Chrome or
-Firefox can be used as the automated browsers, or it can connect to
-arbitrary server providing webdriver interface. The client implements
-most of the webdriver
+This is a web-driver, or Selenium 2, client.  It's purpose is to automate
+browsers, specifically for automatic web server testing.  Chrome or Firefox
+can be used as the automated browsers, or it can connect to arbitrary server
+providing webdriver interface. The client implements most of the webdriver
 [[https://www.w3.org/TR/webdriver2/][specification]].
 
-*** License
+This project was forked from [[https://github.com/her01n/guile-web-driver][guile-web-driver]].
+
+** License
 :PROPERTIES:
 :CUSTOM_ID: license
 :END:
@@ -19,7 +20,7 @@ by the Free Software Foundation, either version 3 of the License, or (at
 your option) any later version. Please see =COPYING= file for the terms
 of GNU General Public License.
 
-*** Requirements
+** Requirements
 :PROPERTIES:
 :CUSTOM_ID: requirements
 :END:
@@ -35,7 +36,7 @@ of GNU General Public License.
 - Optional [[https://github.com/mozilla/geckodriver/][geckodriver]] and
   mozilla firefox browser.
 
-*** Installation
+** Installation
 :PROPERTIES:
 :CUSTOM_ID: installation
 :END:
@@ -50,7 +51,13 @@ make -j$(nproc)
 sudo make install
 #+end_example
 
-*** Usage
+*** GNU Guix
+Manual installation from GNU Guix recipe:
+#+begin_example
+guix package -f ./guix.scm
+#+end_example
+
+** Usage
 :PROPERTIES:
 :CUSTOM_ID: usage
 :END:
@@ -58,7 +65,7 @@ sudo make install
 (use-modules (web driver))
 #+end_example
 
-*** Sessions
+** Sessions
 :PROPERTIES:
 :CUSTOM_ID: sessions
 :END:
@@ -129,7 +136,7 @@ it is not necessary to call /open-web-driver/, only to call
   returns or throws an exception. Returns the value that the /proc/
   returned.
 
-*** Timeouts
+** Timeouts
 :PROPERTIES:
 :CUSTOM_ID: timeouts
 :END:
@@ -164,7 +171,7 @@ it is not necessary to call /open-web-driver/, only to call
 
   Returns the current implicit timeout in milliseconds.
 
-*** Navigation
+** Navigation
 :PROPERTIES:
 :CUSTOM_ID: navigation
 :END:
@@ -197,7 +204,7 @@ it is not necessary to call /open-web-driver/, only to call
   Returns the title of the current page as string. Returns empty string
   if the page did not set a title.
 
-*** Windows
+** Windows
 :PROPERTIES:
 :CUSTOM_ID: windows
 :END:
@@ -239,7 +246,7 @@ TODO optionally accept window argument
 
   Makes the window current.
 
-*** Browsing Context
+** Browsing Context
 :PROPERTIES:
 :CUSTOM_ID: browsing-context
 :END:
@@ -275,7 +282,7 @@ TODO allow switching to any frame, not only to the direct child.
 
   Makes the current window the current browsing context.
 
-*** Rectangle Record
+** Rectangle Record
 :PROPERTIES:
 :CUSTOM_ID: rectangle-record
 :END:
@@ -301,7 +308,7 @@ values are integers.
 
   Gets a field value.
 
-*** Resizing and Positioning Windows
+** Resizing and Positioning Windows
 :PROPERTIES:
 :CUSTOM_ID: resizing-and-positioning-windows
 :END:
@@ -347,7 +354,7 @@ TODO all these methods may accept window as an argument
 
 #+end_quote
 
-*** Finding Elements
+** Finding Elements
 :PROPERTIES:
 :CUSTOM_ID: finding-elements
 :END:
@@ -454,7 +461,7 @@ TODO all these methods may accept window as an argument
   Returns the current active element. Throws exception if there is no
   such element.
 
-*** Element State
+** Element State
 :PROPERTIES:
 :CUSTOM_ID: element-state
 :END:
@@ -504,7 +511,7 @@ TODO implement
 
   Checks if the form control is enabled.
 
-*** Element Interaction
+** Element Interaction
 :PROPERTIES:
 :CUSTOM_ID: element-interaction
 :END:
@@ -567,7 +574,7 @@ TODO implement
   Choose a file for /input/ of type /file/. *path* may be relative or
   absolute, the file should exist.
 
-*** Document
+** Document
 :PROPERTIES:
 :CUSTOM_ID: document
 :END:
@@ -613,7 +620,7 @@ TODO implement
      window.setTimeout(function() { callback(42); }, 1);") => 42
   #+end_src
 
-*** Cookies
+** Cookies
 :PROPERTIES:
 :CUSTOM_ID: cookies
 :END:
@@ -677,7 +684,7 @@ TODO implement
 
   Deletes all cookies associated with the current browsing context.
 
-*** Actions
+** Actions
 :PROPERTIES:
 :CUSTOM_ID: actions
 :END:
