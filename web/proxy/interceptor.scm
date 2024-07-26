@@ -240,11 +240,36 @@ original field if a CHAIN is #f."
                             #:version version
                             #:headers headers
                             #:decode-body? #f)
-            (write-response response (session-record-port server))
-            (put-bytevector (session-record-port server)
-                            response-body)
-            (force-output (session-record-port server))
-            (bye server close-request/rdwr)))
+            (let* ((version
+                    (chain-run response-chain
+                               'version
+                               response-version
+                               response))
+                   (code
+                    (chain-run response-chain
+                               'code
+                               response-code
+                               response))
+                   (reason-phrase
+                    (chain-run response-chain
+                               'reason-phrase
+                               response-reason-phrase
+                               response))
+                   (headers
+                    (chain-run response-chain
+                               'headers
+                               response-headers
+                               response))
+                   (forged-response (build-response
+                                     #:version version
+                                     #:code    code
+                                     #:reason-phrase reason-phrase
+                                     #:headers       headers)))
+              (write-response forged-response (session-record-port server))
+              (put-bytevector (session-record-port server)
+                              response-body)
+              (force-output (session-record-port server))
+              (bye server close-request/rdwr))))
         (begin
           (close (proxy-connection-client-port connection))))))
 
