@@ -41,7 +41,8 @@
   #:use-module ((web driver error) #:prefix error:)
   #:use-module (web driver element)
   #:use-module (web driver rect)
-  #:use-module (web driver javascript))
+  #:use-module (web driver javascript)
+  #:use-module (web driver key))
 
 
 (define %server-address INADDR_LOOPBACK)
@@ -620,8 +621,6 @@ localhost:8080."
   (session-command driver 'DELETE "/cookie"))
 
 ;;; Actions
-
-(use-modules (web driver key))
 
 (define-public (key-down key) (list 'key-down (key->unicode-char key)))
 
