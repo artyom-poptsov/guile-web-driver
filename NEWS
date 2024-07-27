@@ -1,9 +1,27 @@
-#+TITLE: Guile-Web-Driver News -- history of user-visible changes.
+#+TITLE: Guile-Web-Driver-NG News -- history of user-visible changes.
 #+STARTUP: content hidestars
 
-Copyright (C) Michal Herko <michal.herko@disroot.org>
+Copyright (C) 2019-2023 Michal Herko <michal.herko@disroot.org>
+Copyright (C) 2024 Artyom V. Poptsov <poptsov.artyom@gmail.com>
 
   Copying and distribution of this file, with or without modification,
   are permitted in any medium without royalty provided the copyright
   notice and this notice are preserved.
+
+* Unreleased
+** Migrate to GNU Autotools
+This allows to build the project in more convenient way.
+** Implement intercepting proxy
+Implement intercepting (MITM) proxy that allows to inspect and modify HTTP requests
+and responses.
+** Split =driver.scm= into several modules
+** Add GNU Guix recipe
+Now the latest version of the project can be built with =guix build -f
+./guix.scm=.
+** Add Texinfo documentation
+** Implement SRFI-64 tests
+
+Local Variables:
+mode: org
+End:
 
