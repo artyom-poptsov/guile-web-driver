@@ -79,6 +79,10 @@
      guile-json-4
      guile-gnutls
      guile-3.0))
+   (arguments
+    (list #:phases
+          #~(modify-phases %standard-phases
+              (delete 'strip))))
    (home-page "https://github.com/artyom-poptsov/guile-web-driver-ng")
    (synopsis "Web driver (Selenium) client for Guile")
    (description
