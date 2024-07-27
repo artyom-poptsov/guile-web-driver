@@ -275,7 +275,8 @@ original field if a CHAIN is #f."
                                      #:version version
                                      #:code    code
                                      #:reason-phrase reason-phrase
-                                     #:headers       headers)))
+                                     #:headers       headers
+                                     #:validate-headers? #f)))
               (write-response forged-response (session-record-port server))
               (put-bytevector (session-record-port server)
                               response-body)
