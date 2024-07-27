@@ -31,9 +31,11 @@
   #:use-module (ice-9 binary-ports)
   #:use-module (ice-9 rdelim)
   #:use-module (srfi srfi-11)
+  #:use-module (srfi srfi-19)
   #:use-module (rnrs bytevectors)
   #:use-module (gnutls)
   #:use-module (oop goops)
+  #:use-module (web http)
   #:use-module (web uri)
   #:use-module (web client)
   #:use-module (web request)
@@ -51,6 +53,16 @@
             proxy-stop!
 
             make-key))
+
+
+;; XXX: Don't parse "Date" headers because sometimes they are broken and don't
+;;      match the RFC 822 definition.
+;;      E.g.: "Date: Wed, 4 Oct 2023 20:2511 GMT"
+
+(declare-header! "Date"
+                 (lambda (str) str)
+                 date?
+                 (lambda (str) str))
 
 
 
