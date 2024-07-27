@@ -1032,6 +1032,7 @@ goes through the proxy.
 
 @deftp {Class} <proxy-interceptor> @
        [#:chain='()] @
+       [#:tls-session-priorities="NORMAL:+ARCFOUR-128:+CTYPE-X509"] @
        [#:x509-certificate-file=%default-x509-certificate-file] @
        [#:x509-private-key-file=%default-x509-private-key-file]
 
@@ -1039,6 +1040,8 @@ goes through the proxy.
 @item #:chain
 An intercepting proxy chain of actions that must be applied upon the traffic
 (@pxref{Interceptor Chain}.)
+@item #:tls-session-priorities
+TLS session priorities as described in GnuTLS documentation as a string.
 @item #:x509-certificate-file
 The path to a X509 certificate file.
 @item #:x509-private-key-file

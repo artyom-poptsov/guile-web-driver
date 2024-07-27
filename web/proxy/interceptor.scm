@@ -102,6 +102,7 @@
   ;; <string>
   (tls-session-priorities
    #:init-value   "NORMAL:+ARCFOUR-128:+CTYPE-X509"
+   #:init-keyword #:tls-session-priorities
    #:getter       proxy-interceptor-tls-session-priorities)
 
   ;; The path to a X509 certificate file.
