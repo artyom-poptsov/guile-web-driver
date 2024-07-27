@@ -73,7 +73,7 @@
 
   (tls-session
    #:init-value   #f
-   #:init-keyword #:tcp-session
+   #:init-keyword #:tls-session
    #:getter       proxy-connection-tls-session
    #:setter       proxy-connection-tls-session-set!))
 
