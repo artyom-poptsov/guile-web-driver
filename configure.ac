@@ -63,6 +63,7 @@ AC_CONFIG_FILES([
         web/proxy/interceptor/Makefile
         tests/Makefile
         doc/Makefile
+        cert/Makefile
 ])
 
 dnl texinfo package required to make the documentation in Texinfo format.
