@@ -59,10 +59,7 @@
 ;;      match the RFC 822 definition.
 ;;      E.g.: "Date: Wed, 4 Oct 2023 20:2511 GMT"
 
-(declare-header! "Date"
-                 (lambda (str) str)
-                 date?
-                 (lambda (str) str))
+(declare-opaque-header! "Date")
 
 
 
