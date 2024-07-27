@@ -1,6 +1,6 @@
 ## Makefile.am -- Config file for GNU Automake.
 ##
-## Copyright (C) 2019-2023 Michal Herko <michal.herko@disroot.org>
+## Copyright (C) 2024 Artyom V. Poptsov <poptsov.artyom@gmail.com>
 ##
 ## This file is part of Guile-Web-Driver.
 ##
@@ -18,7 +18,7 @@
 
 ACLOCAL_AMFLAGS = -I build-aux
 
-SUBDIRS = build-aux web tests doc cert
+SUBDIRS = build-aux modules/web tests doc cert
 
 EXTRA_DIST = \
 	.dir-locals.el

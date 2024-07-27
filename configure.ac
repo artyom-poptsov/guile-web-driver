@@ -57,10 +57,10 @@ AC_CONFIG_FILES([
         build-aux/am/Makefile
         build-aux/Makefile
         build-aux/m4/Makefile
-        web/Makefile
-        web/driver/Makefile
-        web/proxy/Makefile
-        web/proxy/interceptor/Makefile
+        modules/web/Makefile
+        modules/web/driver/Makefile
+        modules/web/proxy/Makefile
+        modules/web/proxy/interceptor/Makefile
         tests/Makefile
         doc/Makefile
         cert/Makefile

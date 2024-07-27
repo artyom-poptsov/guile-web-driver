@@ -40,7 +40,7 @@ AM_TESTS_ENVIRONMENT = \
 	ORIGTERM=${TERM}; export ORIGTERM; \
 	TERM=xterm; export TERM; \
 	GUILE_AUTO_COMPILE=0; export GUILE_AUTO_COMPILE; \
-	GUILE_LOAD_COMPILED_PATH="$(abs_top_srcdir)"; export GUILE_LOAD_COMPILED_PATH;
+	GUILE_LOAD_COMPILED_PATH="$(abs_top_srcdir)/modules/"; export GUILE_LOAD_COMPILED_PATH;
 
 # LOG_COMPILER was introduced in Automake 1.12; don't expect "make
 # check" or "make distcheck" to work with earlier versions.
