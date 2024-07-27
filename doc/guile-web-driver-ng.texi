@@ -140,9 +140,18 @@ sudo make install
 @node API Reference
 @chapter API Reference
 
+@menu
+* Driver::
+* Proxy::
+@end menu
+
+@c -----------------------------------------------------------------------------
+@node Driver
+@section Driver
+
 @c -----------------------------------------------------------------------------
 @node Sessions
-@section Sessions
+@subsection Sessions
 Following procedures open and close web driver sessions.  Most procedures
 takes the web driver session as an optional argument.  Implicit session would
 be open on first call of such a procedure, so for most use cases it is not
@@ -219,7 +228,7 @@ or throws an exception.  Returns the value that the @var{proc} returned.
 
 @c -----------------------------------------------------------------------------
 @node Timeouts
-@section Timeouts
+@subsection Timeouts
 
 @deffn {Scheme Procedure} set-script-timeout [driver] [milliseconds|#:never]
 Sets the timeout for a @var{driver} for executing scripts with methods
@@ -255,7 +264,7 @@ Returns the current implicit timeout in milliseconds.
 
 @c -----------------------------------------------------------------------------
 @node Navigation
-@section Navigation
+@subsection Navigation
 
 @deffn {Scheme Procedure} navigate-to [driver] url
 Navigates the browser to given @var{url}.  Should be the same as user entering
@@ -288,7 +297,7 @@ the page did not set a title.
 
 @c -----------------------------------------------------------------------------
 @node Windows
-@section Windows
+@subsection Windows
 @cindex Window
 
 Let's define @emph{window} as a browser window, a tab or a similar concept,
@@ -327,7 +336,7 @@ Makes the window current.
 
 @c -----------------------------------------------------------------------------
 @node Browsing Context
-@section Browsing Context
+@subsection Browsing Context
 @cindex Browsing Context
 
 @emph{Browsing context} is either the window or a @code{<frame>},
@@ -360,7 +369,7 @@ Makes the current window the current browsing context.
 
 @c -----------------------------------------------------------------------------
 @node Rectangle Record
-@section Rectangle Record
+@subsection Rectangle Record
 
 @deftp {Record} <rect>
 We define @code{<rect>} record type to be used for all screen geometry
@@ -385,7 +394,7 @@ Gets a @var{rect} field value.
 
 @c -----------------------------------------------------------------------------
 @node Resizing and Positioning Windows
-@section Resizing and Positioning Windows
+@subsection Resizing and Positioning Windows
 
 @deffn {Scheme Procedure} window-rect [driver]
 Returns a screen position and dimension of the current window.
@@ -423,7 +432,7 @@ Restores the window to normal, not maximized, full screen or minimized.
 
 @c -----------------------------------------------------------------------------
 @node Finding Elements
-@section Finding Elements
+@subsection Finding Elements
 
 @deffn {Scheme Procedure} element-by-css-selector [driver] selector [#:from element]
 Finds the first element that matches css selector.  If there is no such
@@ -528,7 +537,7 @@ element.
 
 @c -----------------------------------------------------------------------------
 @node Element State
-@section Element State
+@subsection Element State
 
 @deffn {Scheme Procedure} selected? element
 Returns @code{#t} if the check box or radio box is checked, or if
@@ -573,7 +582,7 @@ Checks if the form control is enabled.
 
 @c -----------------------------------------------------------------------------
 @node Element Interaction
-@section Element Interaction
+@subsection Element Interaction
 
 @deffn  {Scheme Procedure} click element
 @deffnx {Scheme Procedure} click [driver] text
@@ -638,7 +647,7 @@ relative or absolute, the file should exist.
 
 @c -----------------------------------------------------------------------------
 @node Document
-@section Document
+@subsection Document
 
 @deffn {Scheme Procedure} page-source [driver]
 Gets the HTML source of the current browser context (window or frame).
@@ -686,7 +695,7 @@ Example:
 
 @c -----------------------------------------------------------------------------
 @node Cookies
-@section Cookies
+@subsection Cookies
 
 @deffn {Scheme Procedure} cookie-name cookie
 The name of the @var{cookie}.
@@ -759,7 +768,7 @@ Deletes all cookies associated with the current browsing context.
 
 @c -----------------------------------------------------------------------------
 @node Actions
-@section Actions
+@subsection Actions
 @cindex Action
 
 This is a low level interface to generate fine grained input events.  See
@@ -857,6 +866,298 @@ Examples:
   (mouse-move 1 1) (key-down "ControlLeft") (mouse-down #:left)
   (mouse-move 100 100 1000) (release-all))
 @end example
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@node Proxy
+@section Proxy
+
+A proxy is a pass-through service that forwards traffic between a client and a
+service on behalf of a client.  The main purpose of the proxy in
+Guile-Web-Driver-NG is to intercept, inspect and modify traffic.
+
+@menu
+* Proxy Class::
+* Connection::
+* Interceptor::
+* Interceptor Chain::
+@end menu
+
+@c -----------------------------------------------------------------------------
+@node Proxy Class
+@subsection Proxy Class
+
+@deftp {Class} <proxy> @
+       [#:address=INADDR_LOOPBACK] @
+       [#:port=8080] @
+       [#:backlog=1] @
+       [#:interceptor=#f]
+
+The main class that describes a proxy.
+
+Constructor parameters:
+@table @asis
+@item #:address
+An IP address to bind the proxy to.
+@item #:port
+A TCP port to bind proxy to.
+@item #:backlog
+Proxy backlog length.
+@item #:interceptor
+Proxy interceptor to handle the traffic.
+@end table
+
+@end deftp
+
+@deffn {Scheme Procedure} proxy? x
+Check if @code{x} is a @code{<proxy>} instance.
+@end deffn
+
+@deffn {Scheme Procedure} proxy-connect! @
+       (proxy <proxy>) @
+       (client <pair>) @
+       (host <string>) @
+       (tcp-port <number>)
+
+Connect @var{proxy} to a target @var{host} and @var{port} which was requested
+by a @var{client}.  Return a new @code{<proxy-connection>} instance.
+
+@end deffn
+
+@deffn {Scheme Procedure} proxy-connection @
+       (proxy <proxy>) @
+       (host <string>) @
+       (port <number>)
+
+Get a @code{<proxy-connection>} instance referenced by @var{host} and
+@var{port} for a @var{proxy}.
+
+@end deffn
+
+@deffn {Scheme Procedure} proxy-disconnect! @
+       (proxy <proxy>) @
+       (host <string>) @
+       (port <number>)
+
+Disconnect a @var{proxy} from a @var{host} and a @var{port}.  Return value is
+undefined.
+
+@end deffn
+
+@deffn {Scheme Procedure} proxy-create-socket (proxy <proxy>)
+Create a TCP/IP socket for a @var{proxy} to listen to.
+@end deffn
+
+@deffn {Scheme Procedure} proxy-listen! (proxy <proxy>)
+Listen to incoming connections for a @var{proxy}.  Return value is undefined.
+@end deffn
+
+@deffn {Scheme Procedure} proxy-intercept @
+       (proxy <proxy>)
+       (connection <proxy-connection>)
+
+Intercept the traffic coming through a @var{proxy}, replace HTTP headers on
+the way.
+
+@end deffn
+
+@deffn {Scheme Procedure} transfer-data @
+       (proxy <proxy>) @
+       (connection <proxy-connection>)
+
+Transfer data through a @var{proxy}.
+
+@end deffn
+
+@deffn {Scheme Procedure} proxy-start! (proxy <proxy>)
+Start a @var{proxy}.  If the @var{proxy} is already started the procedure
+throws an error.
+@end deffn
+
+@deffn {Scheme Procedure} proxy-stop! (proxy <proxy>)
+Stop a @var{proxy}.
+@end deffn
+
+@deffn {Scheme Procedure} make-key (host <string>) (port <number>)
+Internal procedure to make a key for a proxy connections hash table.
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@node Connection
+@subsection Connection
+
+@deftp {Class} <proxy-connection> @
+       [#:host=#f] @
+       [#:port=#f] @
+       [#:client=#f] @
+       [#:target-port=#f] @
+       [#:tls-session=#f]
+
+@table @asis
+@item #:host
+Target host name.
+@item #:port
+Target TCP port number.
+@item #:client
+TCP/IP client that uses this connection.
+@item #:target-port
+A Scheme port for communication with the target host.
+@item #:tls-session
+TLS session for transferring the data.
+@end table
+
+@end deftp
+
+@deffn {Scheme Procedure} proxy-connection? x
+Check if @var{x} is a @code{<proxy-connection>} instance.
+@end deffn
+
+@deffn {Scheme Procedure} proxy-connection-client-port @
+       (connection <proxy-connection>)
+Get the client socket for a proxy @var{connection}.
+@end deffn
+
+@deffn {Scheme Procedure} proxy-connection-close! @
+       (connection <proxy-connection>)
+Close a @var{connection}.
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@node Interceptor
+@subsection Interceptor
+
+The @code{(web proxy interceptor)} module provides an intercepting (MITM)
+proxy facilities that allow to intercept, inspect and modify the traffic that
+goes through the proxy.
+
+@deftp {Class} <proxy-interceptor> @
+       [#:chain='()] @
+       [#:x509-certificate-file=%default-x509-certificate-file] @
+       [#:x509-private-key-file=%default-x509-private-key-file]
+
+@table @asis
+@item #:chain
+An intercepting proxy chain of actions that must be applied upon the traffic
+(@pxref{Interceptor Chain}.)
+@item #:x509-certificate-file
+The path to a X509 certificate file.
+@item #:x509-private-key-file
+The path to a X509 private key file.
+@end table
+
+@end deftp
+
+@deffn {Scheme Procedure} proxy-interceptor-chain @
+       (interceptor <proxy-interceptor>)
+Get the proxy @var{interceptor} chain.
+@end deffn
+
+@deffn {Scheme Procedure} proxy-interceptor-tls-session-priorities @
+       (interceptor <proxy-interceptor>)
+Get the proxy @var{interceptor} TLS session priorities string.
+@end deffn
+
+@deffn {Scheme Procedure} proxy-interceptor-x509-certificate-file @
+       (interceptor <proxy-interceptor>)
+Get the proxy @var{interceptor} x509 certificate file path as a string.
+@end deffn
+
+@deffn {Scheme Procedure} proxy-interceptor-x509-private-key-file @
+       (interceptor <proxy-interceptor>)
+Get the proxy @var{interceptor} x509 private key file path as a string.
+@end deffn
+
+@deffn {Scheme Procedure} proxy-interceptor-run @
+       (interceptor <proxy-interceptor>) @
+       (connection <proxy-connection>)
+
+Run the proxy @var{interceptor} upon a @var{connection}.
+
+@end deffn
+
+@c @deffn {Scheme Procedure} 
+
+@c @end deffn
+
+
+@c -----------------------------------------------------------------------------
+@node Interceptor Chain
+@subsection Interceptor Chain
+@cindex Proxy Interceptor Chain
+
+@code{(web proxy interceptor chain)} contains the definition of proxy
+interceptor chain that allows to run actions upon the incoming traffic.
+
+A proxy chain is four-column table which is represented by a Scheme list.
+Each table row has the following format:
+@example lisp
+'(<chain> <field> <action> <parameters>)
+@end example
+
+There are currently two possible chains:
+@itemize
+@item request
+@item response
+@end itemize
+
+Possible request/response fields to handle:
+@itemize
+@item method
+@item uri
+@item version
+@item headers
+@item meta
+@item body
+@end itemize
+
+Possible actions:
+@itemize
+@item 'dump
+@item 'replace
+@item <procedure>
+@end itemize
+
+The set of parameters depends on the chosen action.  For ``dump'' action its a
+file name to dump the data into, or one of the following symbols:
+@itemize
+@item stderr
+@item stdout
+@end itemize
+
+For "replace" action the parameter must be the value to set the field to.
+
+Example of a simple interceptor chain:
+@example lisp
+'((request headers dump stderr))
+@end example
+
+More complicated example:
+@example lisp
+'((request headers dump stderr)
+  (request headers replace
+           ((host "example.com" . #f)
+            (user-agent . "curl/8.5.0")
+            (accept (*/*)))))
+@end example
+
+This chain dumps the request headers to @code{stderr} stream first and then
+replaces the headers with provided ones.
+
+@deffn  {Scheme Procedure} rule:type (rule <list>)
+@deffnx {Scheme Procedure} rule:field (rule <list>)
+@deffnx {Scheme Procedure} rule:action (rule <list>)
+@deffnx {Scheme Procedure} rule:parameters (rule <list>)
+Interceptor chain @var{rule} field accessors.
+@end deffn
+
+@deffn {Scheme Procedure} chain-select (chain <list>) (type <symbol>)
+Select rules of a @var{type} from a @var{chain}.
+
+Possible types are: @code{request}, @code{response}.
+@end deffn
+
+@deffn {Scheme Procedure} chain-run (chain <list>) (field <symbol>) object
+Run a @var{chain} on a @var{field} with a value @var{object}.
 @end deffn
 
 @c -----------------------------------------------------------------------------
