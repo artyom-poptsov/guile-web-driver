@@ -203,16 +203,6 @@ original field if a CHAIN is #f."
       (accessor message)))
 
 
-;; XXX: Don't parse "Date" headers because sometimes they are broken and don't
-;;      match the RFC 822 definition.
-;;      E.g.: "Date: Wed, 4 Oct 2023 20:2511 GMT"
-
-(declare-header! "Date"
-                 (lambda (str) str)
-                 date?
-                 (lambda (str) str))
-
-
 (define-method (proxy-interceptor-run (interceptor <proxy-interceptor>)
                                       (connection <proxy-connection>))
   (unless (proxy-connection-tls-session connection)
