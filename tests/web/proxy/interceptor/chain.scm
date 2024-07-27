@@ -50,6 +50,15 @@
                                  'request)))
         (chain-run chain 'method "GET")))))
 
+(test-equal "chain-run: custom procedure"
+  "\"POST\"\n"
+  (with-output-to-string
+    (lambda ()
+      (let ((chain `((request method ,(lambda (chain prev) (list-ref chain 3))
+                              "POST")
+                     (request method dump stdout))))
+        (chain-run chain 'method "GET")))))
+
 
 (define exit-status (test-runner-fail-count (test-runner-current)))
 

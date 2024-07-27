@@ -74,7 +74,7 @@
                    ((equal? action 'replace)
                     parameters)
                    ((procedure? action)
-                    (action chain prev-object))
+                    (action rule prev-object))
                    (else
                     (error "Unknown action" action))))
                 prev-object)))
