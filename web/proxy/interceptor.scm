@@ -44,8 +44,10 @@
   #:use-module (ice-9 receive)
   #:use-module (ice-9 binary-ports)
   #:use-module (srfi srfi-1)
+  #:use-module (srfi srfi-19)
   #:use-module (rnrs bytevectors)
   #:use-module (gnutls)
+  #:use-module (web http)
   #:use-module (web client)
   #:use-module (web request)
   #:use-module (web response)
@@ -200,6 +202,17 @@ original field if a CHAIN is #f."
       (chain-run chain field (accessor message))
       (accessor message)))
 
+
+;; XXX: Don't parse "Date" headers because sometimes they are broken and don't
+;;      match the RFC 822 definition.
+;;      E.g.: "Date: Wed, 4 Oct 2023 20:2511 GMT"
+
+(declare-header! "Date"
+                 (lambda (str) str)
+                 date?
+                 (lambda (str) str))
+
+
 (define-method (proxy-interceptor-run (interceptor <proxy-interceptor>)
                                       (connection <proxy-connection>))
   (unless (proxy-connection-tls-session connection)
