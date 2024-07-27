@@ -68,7 +68,7 @@
   ;;
   ;; Possible chains:
   ;;   request
-  ;;   response (not yet)
+  ;;   response
   ;;
   ;; Possible request/response fields:
   ;;   method
