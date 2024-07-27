@@ -61,8 +61,6 @@
 (define-method (chain-run (chain <list>) (field <symbol>) object)
   "Run an interceptor CHAIN for a FIELD on an OBJECT (the field value.)"
   (fold (lambda (rule prev-object)
-          (format (current-error-port) "rule: ~a; obj: ~a~%"
-                  rule prev-object)
           (let ((current-field (rule:field rule)))
             (if (equal? current-field field)
                 (let ((action     (rule:action rule))
