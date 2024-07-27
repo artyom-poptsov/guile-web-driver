@@ -1,9 +1,10 @@
-dnl   configuration script for Guile-Web-Driver
+dnl   configuration script for Guile-Web-Driver-NG.
 dnl   Process this file with autoconf to produce configure.
 dnl
 
 define(GUILE_WEB_DRIVER_CONFIGURE_COPYRIGHT, [[
 Copyright (C) 2019-2023 Michal Herko <michal.herko@disroot.org>
+Copyright (C) 2024 Artyom V. Poptsov <poptsov.artyom@gmail.com>
 
 This file is part of Guile-Web-Driver.
 

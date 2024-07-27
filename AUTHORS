@@ -1,5 +1,6 @@
-Authors of Guile-Web-Driver
+Authors of Guile-Web-Driver-NG
 
 * Michal Herko <michal.herko@disroot.org>
+  The author of the original Guile-Web-Driver library.
 * Artyom V. Poptsov <poptsov.artyom@gmail.com>
-  Migration to GNU Autotools from hand-written scripts.
+  The author of Guile-Web-Driver-NG, a fork of Guile-Web-Driver.
