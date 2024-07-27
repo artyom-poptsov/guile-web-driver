@@ -21,9 +21,9 @@ You should have received a copy of the GNU General Public License
 along with Guile-Web-Driver.  If not, see <http://www.gnu.org/licenses/>.
 ]])
 
-AC_INIT([Guile-Web-Driver], [0.1], [michal.herko@disroot.org],
-                     [guile-web-driver],
-                     [https://github.com/her01n/guile-web-driver])
+AC_INIT([Guile-Web-Driver-NG], [0.1], [poptsov.artyom@gmail.com],
+                     [guile-web-driver-ng],
+                     [https://github.com/her01n/guile-web-driver-ng])
 
 AC_COPYRIGHT(GUILE_WEB_DRIVER_CONFIGURE_COPYRIGHT)
 AC_CONFIG_AUX_DIR([build-aux])
