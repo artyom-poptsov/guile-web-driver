@@ -38,6 +38,7 @@
   #:use-module (web http)
   #:use-module (web uri)
   #:use-module (web client)
+  #:use-module (web driver log)
   #:use-module (web request)
   #:use-module (web response)
   #:use-module (web server)
@@ -197,7 +198,7 @@
                   (begin
                     (sleep 1)))))
           (lambda (key . args)
-            (format #t "DEBUG ERR\n"))))))
+            (log-error "~a: ~a" key args))))))
 
   (let ((client-socket (proxy-connection-client-port connection)))
     (client-to-destination client-socket)
@@ -243,13 +244,6 @@
          (port    (string->number (uri-path uri)))
          (meta    (request-meta request))
          (version (request-version request)))
-    (format (current-error-port)
-            "request: ~S; body: ~S; uri: ~S; host: ~S, port: ~S~%"
-            request
-            body
-            uri
-            host
-            port)
     (case method
       ((CONNECT)
        (let ((connection (proxy-connect! proxy client host port))
@@ -270,6 +264,7 @@
 (define-method (proxy-start! (proxy <proxy>))
   "Start a PROXY.  If the PROXY is already started the procedure throws an error."
   (when (proxy-socket proxy)
+    (log-error "Proxy already started: ~a" proxy)
     (error "Proxy already started" proxy))
   (proxy-listen! proxy)
   (call-with-new-thread
@@ -280,9 +275,7 @@
            (let ((client (accept (proxy-socket proxy))))
              (proxy-handle-client proxy client)))
          (lambda (key . args)
-           (format (current-error-port)
-                   ";;; ERROR: ~a: ~a~%"
-                   key args)))))))
+           (log-error "~a: ~a" key args)))))))
 
 (define-method (proxy-stop! (proxy <proxy>))
   "Stop a PROXY."
