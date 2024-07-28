@@ -52,6 +52,7 @@
   #:use-module (web request)
   #:use-module (web response)
   #:use-module (web uri)
+  #:use-module (web driver log)
   #:use-module (web proxy common)
   #:use-module (web proxy config)
   #:use-module (web proxy connection)
@@ -155,8 +156,8 @@ INTERCEPTOR.  Return two values: a X509 certificate and a private key."
   (next-method)
   (receive (certificate private-key)
       (proxy-interceptor-import-keys interceptor)
-    (format (current-error-port) "certificate: ~S~%" certificate)
-    (format (current-error-port) "private key: ~S~%" private-key)
+    (log-info "<proxy-interceptor>: certificate: ~S~%" certificate)
+    (log-info "<proxy-interceptor>: private key: ~S~%" private-key)
     (proxy-interceptor-x509-certificate-set! interceptor certificate)
     (proxy-interceptor-x509-private-key-set! interceptor private-key)))
 
@@ -189,7 +190,9 @@ INTERCEPTOR.  Return two values: a X509 certificate and a private key."
       (lambda ()
         (handshake server))
       (lambda (key . args)
-        (format (current-error-port) "ERROR: ~a: ~a~%" key args)))
+        (log-error "proxy-interceptor-make-session!: ~a: ~a~%"
+                   key
+                   args)))
     (proxy-connection-tls-session-set! connection server)))
 
 (define-method (chain-run (chain <top>)
@@ -231,10 +234,9 @@ original field if a CHAIN is #f."
                                       #:port (proxy-connection-port connection)
                                       #:path (uri-path uri)
                                       #:query (uri-query uri))))
-          (format #t "received the following message: ~a~%"
-                  request)
-          (format #t "uri: ~a~%"
-                  uri)
+          (log-debug "proxy-interceptor-run: received a message: ~a"
+                     request)
+          (log-debug "proxy-interceptor-run: uri: ~a" uri)
           (receive (response response-body)
               (http-request uri
                             #:method method
