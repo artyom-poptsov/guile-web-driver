@@ -243,6 +243,7 @@ original field if a CHAIN is #f."
           (log-debug "proxy-interceptor-run: received a message: ~a"
                      request)
           (log-debug "proxy-interceptor-run: uri: ~a" uri)
+          (log-debug "proxy-interceptor-run: chain: ~S" scenario)
           (receive (response response-body)
               (http-request uri
                             #:method method
