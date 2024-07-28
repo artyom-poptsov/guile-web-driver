@@ -275,9 +275,12 @@
        (catch #t
          (lambda ()
            (let ((client (accept (proxy-socket proxy))))
+             (log-info "proxy-start!: Client accepted: ~a"
+                       client)
              (proxy-handle-client proxy client)))
          (lambda (key . args)
-           (log-error "~a: ~a" key args)))))))
+           (log-error "proxy-start!: ~a: ~a" key args))))
+     (log-info "proxy-start!: Port closed."))))
 
 (define-method (proxy-stop! (proxy <proxy>))
   "Stop a PROXY."
