@@ -27,6 +27,7 @@
   #:use-module (ice-9 rdelim)
   #:use-module (ice-9 popen)
   #:use-module (ice-9 format)
+  #:use-module (scheme documentation)
   #:use-module (logging logger)
   #:use-module (oop goops)
   #:use-module (web driver common)

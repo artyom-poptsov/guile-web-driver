@@ -71,6 +71,7 @@
           pkg-config
           texinfo
           ;; needed when cross-compiling.
+          guile-lib
           guile-json-4
           guile-gnutls
           guile-3.0))
@@ -78,6 +79,7 @@
     (list
      guile-json-4
      guile-gnutls
+     guile-lib
      guile-3.0
      inetutils))
    (arguments
