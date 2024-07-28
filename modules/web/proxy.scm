@@ -257,6 +257,7 @@
 
 (define-method (proxy-handle-client (proxy <proxy>) client)
   "Handle a TCP/IP CLIENT connected to a PROXY."
+  (log-info "proxy-handle-client: New client: ~a" client)
   (call-with-new-thread
    (lambda ()
      (handle-request proxy client))))
