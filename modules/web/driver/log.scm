@@ -30,6 +30,7 @@
   #:use-module (logging logger)
   #:use-module (oop goops)
   #:use-module (web driver common)
+  #:use-module (web driver config)
   #:export (<precise-logger>
             precise-logger?
 
