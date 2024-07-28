@@ -171,9 +171,14 @@ INTERCEPTOR.  Return two values: a X509 certificate and a private key."
         (pub         (proxy-interceptor-x509-certificate interceptor))
         (sec         (proxy-interceptor-x509-private-key interceptor)))
 
-    (set-session-priorities!
-     server
-     (proxy-interceptor-tls-session-priorities interceptor))
+    (log-info "proxy-interceptor-make-session!: ~a: ~a"
+              interceptor
+              connection)
+
+    (let ((priorities (proxy-interceptor-tls-session-priorities interceptor)))
+      (log-info "proxy-interceptor-make-session!: priorities: ~a"
+                priorities)
+      (set-session-priorities! server priorities))
 
     ;; Specify the underlying transport socket.
     (set-session-transport-fd! server (fileno client-port))
