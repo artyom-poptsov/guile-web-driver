@@ -244,6 +244,7 @@
          (port    (string->number (uri-path uri)))
          (meta    (request-meta request))
          (version (request-version request)))
+    (log-info "handle-request: method: ~a" method)
     (case method
       ((CONNECT)
        (let ((connection (proxy-connect! proxy client host port))
