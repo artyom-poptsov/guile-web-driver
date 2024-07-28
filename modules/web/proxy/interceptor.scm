@@ -217,8 +217,9 @@ original field if a CHAIN is #f."
                     (lambda ()
                       (read-request (session-record-port server)))
                     (lambda (key . args)
-                      (format (current-error-port)
-                              "ERROR: ~a: ~a~%" key args)
+                      (log-error "proxy-interceptor-run: ~a: ~a~%"
+                                 key
+                                 args)
                       #f)))
          (scenario (proxy-interceptor-chain interceptor)))
     (if request
