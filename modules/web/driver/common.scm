@@ -5,7 +5,31 @@
   #:export (hash-table->alist
             to-assoc-list
             request-body->bytevector
-            fold-null))
+            fold-null
+
+            define-with-docs
+            define-class-with-docs))
+
+
+;;; Taken from (scheme documentation).
+
+(define-macro (define-macro-with-docs name-and-args docs . body)
+  "Define a macro with documentation."
+  `(define-macro ,name-and-args ,docs ,@body))
+
+(define-macro-with-docs (define-with-docs sym docs val)
+  "Define a variable with documentation."
+  `(begin
+     (define ,sym ,val)
+     (set-object-property! ,sym 'documentation ,docs)
+     *unspecified*))
+
+(define-macro-with-docs (define-class-with-docs name supers docs . slots)
+  "Define a class with documentation."
+  `(begin
+     (define-class ,name ,supers ,@slots)
+     (set-object-property! ,name 'documentation ,docs)
+     (if #f #f)))
 
 
 

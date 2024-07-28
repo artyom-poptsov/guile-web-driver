@@ -71,6 +71,8 @@ AC_CHECK_PROG(MAKEINFO_CHECK, makeinfo, yes)
 AS_IF([test x"$MAKEINFO_CHECK" != x"yes"],
             [ AC_MSG_ERROR([Please install texinfo before configuring])])
 
+AC_PATH_PROG(LOGGER_BINARY, [logger])
+
 # Generate a Makefile, based on the results.
 AC_OUTPUT
 

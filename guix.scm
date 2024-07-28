@@ -78,7 +78,8 @@
     (list
      guile-json-4
      guile-gnutls
-     guile-3.0))
+     guile-3.0
+     inetutils))
    (arguments
     (list #:phases
           #~(modify-phases %standard-phases

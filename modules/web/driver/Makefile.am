@@ -20,7 +20,9 @@
 include $(top_srcdir)/build-aux/am/guile.am
 
 SOURCES = \
+	config.scm	\
 	common.scm	\
+	log.scm		\
 	error.scm	\
 	rect.scm	\
 	element.scm	\
@@ -28,7 +30,16 @@ SOURCES = \
 	key.scm		\
 	cookie.scm
 
+EXTRA_DIST += \
+	config.scm.in
+
 moddir=$(prefix)/share/guile/site/$(GUILE_EFFECTIVE_VERSION)/web/driver/
 godir=$(libdir)/guile/$(GUILE_EFFECTIVE_VERSION)/site-ccache/web/driver/
+
+config_substitute = sed -e 's,[@]LOGGER_BINARY[@],$(LOGGER_BINARY),g'
+config.scm: config.scm.in
+	@echo "  GEN      $@"
+	@$(config_substitute) "$^" > "$@"
+
 
 ### Makefile.am ends here.
