@@ -284,6 +284,7 @@
   (when (proxy-socket proxy)
     (log-error "Proxy already started: ~a" proxy)
     (error "Proxy already started" proxy))
+  (log-info "proxy-start!: Starting ~a ..." proxy)
   (proxy-listen! proxy)
   (call-with-new-thread
    (lambda ()
