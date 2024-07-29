@@ -242,6 +242,7 @@ original field if a CHAIN is #f."
                                  key
                                  args)
                       #f)))
+         (body     (read-request-body request))
          (scenario (proxy-interceptor-chain interceptor)))
     (log-debug "proxy-interceptor-run: received a message: ~a"
                request)
@@ -264,6 +265,7 @@ original field if a CHAIN is #f."
           (log-debug "proxy-interceptor-run: chain: ~S" scenario)
           (receive (response response-body)
               (http-request uri
+                            #:body body
                             #:method method
                             #:version version
                             #:headers headers
