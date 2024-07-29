@@ -245,7 +245,7 @@ original field if a CHAIN is #f."
          (body     (and request
                         (read-request-body request)))
          (scenario (proxy-interceptor-chain interceptor)))
-    (log-debug "proxy-interceptor-run: received a message: ~a"
+    (log-debug "proxy-interceptor-run: received a request: ~a"
                request)
     (if request
         (let* ((request-chain  (chain-select scenario 'request))
@@ -260,8 +260,9 @@ original field if a CHAIN is #f."
                                       #:port (proxy-connection-port connection)
                                       #:path (uri-path uri)
                                       #:query (uri-query uri))))
-          (log-debug "proxy-interceptor-run: forged message: ~a"
-                     request)
+          (log-debug "proxy-interceptor-run: forged request: method: ~a; headers: ~a"
+                     method
+                     headers)
           (log-debug "proxy-interceptor-run: uri: ~a" uri)
           (log-debug "proxy-interceptor-run: chain: ~S" scenario)
           (receive (response response-body)
