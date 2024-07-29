@@ -42,6 +42,7 @@
   #:use-module (web request)
   #:use-module (web response)
   #:use-module (web server)
+  #:use-module (web proxy common)
   #:use-module (web proxy connection)
   #:use-module (web proxy interceptor)
   #:export (<proxy>
@@ -108,6 +109,21 @@
    #:init-value   #f
    #:init-keyword #:interceptor
    #:getter       proxy-interceptor))
+
+
+
+(define-method (%display (proxy <proxy>) (port <port>))
+  (format port
+          "#<proxy ~a:~a  ~a>"
+          (proxy-address proxy)
+          (proxy-port proxy)
+          (object-address/hex-string proxy)))
+
+(define-method (display (proxy <proxy>) (port <port>))
+  (%display proxy port))
+
+(define-method (write (proxy <proxy>) (port <port>))
+  (%display proxy port))
 
 
 
