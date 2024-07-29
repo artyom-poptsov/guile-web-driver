@@ -69,7 +69,7 @@
                    ((equal? action 'dump)
                     (pretty-print prev-object)
                     prev-object)
-                   ((equal? action 'replace)
+                   ((equal? action 'set)
                     parameters)
                    ((procedure? action)
                     (action rule prev-object))

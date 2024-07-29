@@ -1116,7 +1116,7 @@ Possible request/response fields to handle:
 Possible actions:
 @itemize
 @item 'dump
-@item 'replace
+@item 'set
 @item <procedure>
 @end itemize
 
@@ -1127,7 +1127,7 @@ file name to dump the data into, or one of the following symbols:
 @item stdout
 @end itemize
 
-For "replace" action the parameter must be the value to set the field to.
+For ``set'' action the parameter must be the value to set the field to.
 
 Example of a simple interceptor chain:
 @example lisp
@@ -1137,14 +1137,14 @@ Example of a simple interceptor chain:
 More complicated example:
 @example lisp
 '((request headers dump stderr)
-  (request headers replace
+  (request headers set
            ((host "example.com" . #f)
             (user-agent . "curl/8.5.0")
             (accept (*/*)))))
 @end example
 
 This chain dumps the request headers to @code{stderr} stream first and then
-replaces the headers with provided ones.
+replaces the headers with the provided ones.
 
 @deffn  {Scheme Procedure} rule:type (rule <list>)
 @deffnx {Scheme Procedure} rule:field (rule <list>)

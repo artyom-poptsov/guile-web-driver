@@ -83,7 +83,7 @@
   ;;
   ;; Possible actions:
   ;;   'dump
-  ;;   'replace
+  ;;   'set
   ;;   <procedure>
   ;;
   ;; The set of parameters depends on the chosen action.  For "dump" action
@@ -91,7 +91,7 @@
   ;;   stderr
   ;;   stdout
   ;;
-  ;; For "replace" action the parameter must be the value to set the field to.
+  ;; For "set" action the parameter must be the value to set the field to.
   ;;
   ;; Example:
   ;;   '((request headers dump stderr))
