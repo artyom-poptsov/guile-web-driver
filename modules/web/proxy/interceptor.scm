@@ -138,6 +138,22 @@
 
 
 
+(define-method (%display (interceptor <proxy-interceptor>) (port <port>))
+  (format port
+          "#<proxy-interceptor certificate: ~a key: ~a chain length: ~a ~a>"
+          (proxy-interceptor-x509-certificate-file interceptor)
+          (proxy-interceptor-x509-private-key-file interceptor)
+          (length (proxy-interceptor-chain interceptor))
+          (object-address/hex-string interceptor)))
+
+(define-method (display (interceptor <proxy-interceptor>) (port <port>))
+  (%display interceptor port))
+
+(define-method (write (interceptor <proxy-interceptor>) (port <port>))
+  (%display interceptor port))
+
+
+
 (define (import-key import-proc file)
   "Import a key FILE using a procedure IMPORT-PROC, return the imported key."
   (let* ((raw (get-bytevector-all (open-input-file file))))
