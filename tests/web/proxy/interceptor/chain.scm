@@ -50,6 +50,31 @@
                                  'request)))
         (chain-run chain 'method "GET")))))
 
+(test-equal "chain-run: replace"
+  '((header-1 . "value-1")
+    (header-2 . "new-value"))
+  (let ((chain '((request headers replace
+                          ((header-2 . "new-value"))))))
+    (chain-run chain 'headers '((header-1 . "value-1")
+                                (header-2 . "value-2")))))
+
+(test-equal "chain-run: append"
+  '((header-1 . "value-1")
+    (header-2 . "value-2")
+    (new-header . "new-value"))
+  (let ((chain '((request headers append
+                          ((new-header . "new-value"))))))
+    (chain-run chain 'headers '((header-1 . "value-1")
+                                (header-2 . "value-2")))))
+
+(test-equal "chain-run: delete"
+  '((header-1 . "value-1")
+    (header-3 . "value-3"))
+  (let ((chain '((request headers delete (header-2)))))
+    (chain-run chain 'headers '((header-1 . "value-1")
+                                (header-2 . "value-2")
+                                (header-3 . "value-3")))))
+
 (test-equal "chain-run: custom procedure"
   "\"POST\"\n"
   (with-output-to-string

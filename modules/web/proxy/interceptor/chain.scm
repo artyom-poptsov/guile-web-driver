@@ -32,6 +32,10 @@
   #:export (chain-select
             chain-run
 
+            replace
+            append
+            delete
+
             rule:type
             rule:field
             rule:action
@@ -49,6 +53,40 @@
 (define-method (rule:parameters (rule <list>))
   (list-ref rule 3))
 
+
+
+(define-method (replace (rule <list>) (old-object <list>))
+  "Replace elements from an associative list @var{old-object} with new ones from
+the @var{rule} parameters.  Return new object."
+  (let ((new-object (rule:parameters rule)))
+    (reverse (fold (lambda (old-element prev)
+                     (let* ((element-name (car old-element))
+                            (new-element  (assq element-name new-object)))
+                       (if new-element
+                           (cons new-element prev)
+                           (cons old-element prev))))
+                   '()
+                   old-object))))
+
+(define-method (append (rule <list>) (old-object <list>))
+  "Append new elements from a @var{rule} to elements of an associative list
+@var{old-object}.  Return new object."
+  (let ((new-elements (rule:parameters rule)))
+    (format (current-error-port) "old: ~S; elem: ~S~%" old-object new-elements)
+    ((@@ (guile) append) old-object new-elements)))
+
+(define-method (delete (rule <list>) old-object)
+  "Delete elements from an associative list @var{old-object} with keys that match
+the keys listen in the @var{rule} parameter.  Return new object."
+  (let ((elements-to-delete (rule:parameters rule)))
+    (reverse (fold (lambda (element prev)
+                     (if (member (car element) elements-to-delete)
+                         prev
+                         (cons element prev)))
+                   '()
+                   old-object))))
+
+
 (define-method (chain-select (chain <list>) (type <symbol>))
   "Select all the chains of the TYPE from a SCENARIO."
   (reverse (fold (lambda (rule prev)
@@ -71,6 +109,12 @@
                     prev-object)
                    ((equal? action 'set)
                     parameters)
+                   ((equal? action 'replace)
+                    (replace rule prev-object))
+                   ((equal? action 'append)
+                    (append rule prev-object))
+                   ((equal? action 'delete)
+                    (delete rule prev-object))
                    ((procedure? action)
                     (action rule prev-object))
                    (else
