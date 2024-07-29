@@ -268,6 +268,8 @@ original field if a CHAIN is #f."
                             #:version version
                             #:headers headers
                             #:decode-body? #f)
+            (log-debug "proxy-interceptor-run: original response: ~S"
+                       response)
             (let* ((version
                     (chain-run response-chain
                                'version
@@ -294,6 +296,8 @@ original field if a CHAIN is #f."
                                      #:reason-phrase reason-phrase
                                      #:headers       headers
                                      #:validate-headers? #f)))
+              (log-debug "proxy-interceptor-run: forged response: ~S"
+                         response)
               (write-response forged-response (session-record-port server))
               (put-bytevector (session-record-port server)
                               response-body)
