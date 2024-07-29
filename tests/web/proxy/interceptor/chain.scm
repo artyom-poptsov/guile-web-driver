@@ -11,7 +11,7 @@
 
 (define %rule-1 '(request method dump stdout))
 (define %rule-2 '(response method dump stdout))
-(define %rule-3 '(request method replace "POST"))
+(define %rule-3 '(request method set "POST"))
 (define %chain-1 `(,%rule-1 ,%rule-2))
 
 (test-equal "rule:type"
@@ -42,7 +42,7 @@
                  'method
                  "test"))))
 
-(test-equal "chain-run: replace"
+(test-equal "chain-run: set"
   "\"POST\"\n"
   (with-output-to-string
     (lambda ()
