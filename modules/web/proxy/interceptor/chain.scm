@@ -41,16 +41,21 @@
             rule:action
             rule:parameters))
 
+
 (define-method (rule:type (rule <list>))
+  "Get the @code{type} of a @var{rule}."
   (list-ref rule 0))
 
 (define-method (rule:field (rule <list>))
+  "Get the @code{field} of a @var{rule}."
   (list-ref rule 1))
 
 (define-method (rule:action (rule <list>))
+  "Get the @code{action} of a @var{rule}."
   (list-ref rule 2))
 
 (define-method (rule:parameters (rule <list>))
+  "Get the @code{parameters} of a @var{rule}."
   (list-ref rule 3))
 
 
@@ -88,7 +93,7 @@ the keys listen in the @var{rule} parameter.  Return new object."
 
 
 (define-method (chain-select (chain <list>) (type <symbol>))
-  "Select all the chains of the TYPE from a SCENARIO."
+  "Select all the chains of the @var{type} from a @var{chain}."
   (reverse (fold (lambda (rule prev)
                    (if (equal? (rule:type rule) type)
                        (cons rule prev)
@@ -97,7 +102,9 @@ the keys listen in the @var{rule} parameter.  Return new object."
                  chain)))
 
 (define-method (chain-run (chain <list>) (field <symbol>) object)
-  "Run an interceptor CHAIN for a FIELD on an OBJECT (the field value.)"
+  "Run an interceptor @var{chain} for a @var{field} on an @var{object} (the field
+value.)  Return a forged object or the same @var{object} if no rules was
+applied to it."
   (fold (lambda (rule prev-object)
           (let ((current-field (rule:field rule)))
             (if (equal? current-field field)
