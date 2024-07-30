@@ -199,20 +199,34 @@ INTERCEPTOR.  Return two values: a X509 certificate and a private key."
                 priorities)
       (set-session-priorities! server priorities))
 
+    (log-debug "proxy-interceptor-make-session!: set-session-transport-fd!: ~a"
+               (fileno client-port))
     ;; Specify the underlying transport socket.
     (set-session-transport-fd! server (fileno client-port))
 
+    (log-debug "proxy-interceptor-make-session!: make-certificate-credentials")
     ;; Create anonymous credentials.
     (let ((cred (make-certificate-credentials)))
+      (log-debug
+       "proxy-interceptor-make-session!: make-certificate-credentials")
       (set-certificate-credentials-x509-keys! cred
                                               (list pub)
                                               sec)
+      (log-debug
+       "proxy-interceptor-make-session!: set-session-credentials!: ~a"
+       cred)
       (set-session-credentials! server cred))
 
     ;; Perform the TLS handshake with the client.
     (catch 'gnutls-error
       (lambda ()
+        (log-debug
+         "proxy-interceptor-make-session!: handshake with ~a ..."
+         server)
         (handshake server)
+        (log-debug
+         "proxy-interceptor-make-session!: handshake with ~a ... done"
+         server)
         (proxy-connection-tls-session-set! connection server))
       (lambda (key . args)
         (log-error "proxy-interceptor-make-session!: ~a: ~a~%"
