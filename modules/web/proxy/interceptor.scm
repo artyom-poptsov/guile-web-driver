@@ -270,13 +270,13 @@ procedure.  Return a forged field or the original field if a @var{chain} is
       ;; Receive data over the TLS record layer.
       (let* ((request (catch #t
                         (lambda ()
-                          (log-debug "proxy-interceptor-run: Reading request")
+                          (log-debug "proxy-interceptor-run: Reading request from ~a"
+                                     (session-record-port server))
                           (read-request (session-record-port server)))
                         (lambda (key . args)
                           (log-error "proxy-interceptor-run: ~a: ~a~%"
                                      key
                                      args)
-                          (proxy-interceptor-make-session! interceptor connection)
                           #f)))
              (body     (and request
                             (read-request-body request)))
@@ -340,14 +340,16 @@ procedure.  Return a forged field or the original field if a @var{chain} is
                                          #:code    code
                                          #:reason-phrase reason-phrase
                                          #:headers       headers
-                                         #:validate-headers? #f)))
+                                         #:validate-headers? #f
+                                         #:port (session-record-port server))))
                   (log-debug "proxy-interceptor-run: forged response: ~S"
                              response)
                   (write-response forged-response (session-record-port server))
-                  (put-bytevector (session-record-port server)
-                                  response-body)
                   (force-output (session-record-port server))
-                  (bye server close-request/rdwr))))
+                  (write-response-body forged-response
+                                       response-body)
+                  (force-output (session-record-port server)) )))
+                  ;; (bye server close-request/rdwr))))
             (begin
               (close (proxy-connection-client-port connection))))))))
 
