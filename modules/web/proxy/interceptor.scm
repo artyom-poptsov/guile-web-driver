@@ -84,6 +84,9 @@
   ;; Possible actions:
   ;;   'dump
   ;;   'set
+  ;;   'replace
+  ;;   'append
+  ;;   'delete
   ;;   <procedure>
   ;;
   ;; The set of parameters depends on the chosen action.  For "dump" action
