@@ -255,6 +255,7 @@ original field if a CHAIN is #f."
                (version (chain-run request-chain 'version request-version request))
                (headers (chain-run request-chain 'headers request-headers request))
                (meta    (chain-run request-chain 'meta    request-meta request))
+               (body    (chain-run request-chain 'body    body))
                (uri        (build-uri 'https
                                       #:host (proxy-connection-host connection)
                                       #:port (proxy-connection-port connection)
@@ -294,6 +295,10 @@ original field if a CHAIN is #f."
                                'headers
                                response-headers
                                response))
+                   (response-body
+                    (chain-run response-chain
+                               'body
+                               response-body))
                    (forged-response (build-response
                                      #:version version
                                      #:code    code
