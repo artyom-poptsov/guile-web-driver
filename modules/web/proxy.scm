@@ -141,27 +141,37 @@
                                (client <pair>)
                                (host <string>)
                                (tcp-port <number>))
-  "Connection to a target host which was requested by a client.  Return a new
-<proxy-connection> instance."
+  "Connection to a target @var{host} and @var{tcp-port} which was requested by a
+@var{client}.  Return a new @code{<proxy-connection>} instance or @code{#f} on
+errors."
   (let* ((connections (proxy-connections proxy))
          (s  (socket PF_INET SOCK_STREAM 0))
          (ai (car (getaddrinfo host))))
     (log-info "proxy-connect: Connecting to ~a:~a ..." host tcp-port)
-    (connect s
-             AF_INET
-             (sockaddr:addr (addrinfo:addr ai))
-             tcp-port)
-    (log-info "proxy-connect: Connecting to ~a:~a ... done" host tcp-port)
-    (let ((conn (make <proxy-connection>
-                  #:host host
-                  #:port tcp-port
-                  #:client client
-                  #:target-port s)))
-      (log-info "proxy-connect: Connection: ~a" conn)
-      (hash-set! connections
-                 (make-key host tcp-port)
-                 conn)
-      conn)))
+    (catch #t
+      (lambda ()
+        (connect s
+                 AF_INET
+                 (sockaddr:addr (addrinfo:addr ai))
+                 tcp-port)
+        (log-info "proxy-connect: Connecting to ~a:~a ... done" host tcp-port)
+        (let ((conn (make <proxy-connection>
+                      #:host host
+                      #:port tcp-port
+                      #:client client
+                      #:target-port s)))
+          (log-info "proxy-connect: Connection: ~a" conn)
+          (hash-set! connections
+                     (make-key host tcp-port)
+                     conn)
+          conn))
+      (lambda (key . args)
+        (log-error "proxy-connect!: Error connecting to ~a:~a: ~a: ~a"
+                   host
+                   tcp-port
+                   key
+                   args)
+        #f))))
 
 (define-method (proxy-connection (proxy <proxy>)
                                  (host <string>)
@@ -266,11 +276,13 @@
     (log-info "handle-request: method: ~a" method)
     (case method
       ((CONNECT)
-       (let ((connection (proxy-connect! proxy client host port))
-             (response (build-response)))
-         (write-response response client-socket)
-         (force-output client-socket)
-         (transfer-data proxy connection)))
+       (let ((connection (proxy-connect! proxy client host port)))
+         (if connection
+             (let ((response (build-response)))
+               (write-response response client-socket)
+               (force-output client-socket)
+               (transfer-data proxy connection))
+             (log-error "handle-request: Could not connect to ~a:~a" host port))))
       (else
        (let ((connection (proxy-connect! proxy host port)))
          (forward-request proxy connection request body))))))
