@@ -212,12 +212,14 @@ INTERCEPTOR.  Return two values: a X509 certificate and a private key."
     ;; Perform the TLS handshake with the client.
     (catch 'gnutls-error
       (lambda ()
-        (handshake server))
+        (handshake server)
+        (proxy-connection-tls-session-set! connection server))
       (lambda (key . args)
         (log-error "proxy-interceptor-make-session!: ~a: ~a~%"
                    key
-                   args)))
-    (proxy-connection-tls-session-set! connection server)))
+                   args)
+        (close client-port)
+        (proxy-connection-tls-session-set! connection #f)))))
 
 (define-method (chain-run (chain <top>)
                           (field <symbol>)
@@ -235,87 +237,89 @@ original field if a CHAIN is #f."
   (unless (proxy-connection-tls-session connection)
     (proxy-interceptor-make-session! interceptor connection))
 
-  ;; Receive data over the TLS record layer.
-  (let* ((server  (proxy-connection-tls-session connection))
-         (request (catch #t
-                    (lambda ()
-                      (read-request (session-record-port server)))
-                    (lambda (key . args)
-                      (log-error "proxy-interceptor-run: ~a: ~a~%"
-                                 key
-                                 args)
-                      #f)))
-         (body     (and request
-                        (read-request-body request)))
-         (scenario (proxy-interceptor-chain interceptor)))
-    (log-debug "proxy-interceptor-run: received a request: ~a"
-               request)
-    (if request
-        (let* ((request-chain  (chain-select scenario 'request))
-               (response-chain (chain-select scenario 'response))
-               (method  (chain-run request-chain 'method request-method request))
-               (uri     (chain-run request-chain 'uri request-uri request))
-               (version (chain-run request-chain 'version request-version request))
-               (headers (chain-run request-chain 'headers request-headers request))
-               (meta    (chain-run request-chain 'meta    request-meta request))
-               (body    (chain-run request-chain 'body    body))
-               (uri        (build-uri 'https
-                                      #:host (proxy-connection-host connection)
-                                      #:port (proxy-connection-port connection)
-                                      #:path (uri-path uri)
-                                      #:query (uri-query uri))))
-          (log-debug "proxy-interceptor-run: forged request: method: ~a; headers: ~a"
-                     method
-                     headers)
-          (log-debug "proxy-interceptor-run: uri: ~a" uri)
-          (log-debug "proxy-interceptor-run: chain: ~S" scenario)
-          (receive (response response-body)
-              (http-request uri
-                            #:body body
-                            #:method method
-                            #:version version
-                            #:headers headers
-                            #:decode-body? #f)
-            (log-debug "proxy-interceptor-run: original response: ~S"
-                       response)
-            (let* ((version
-                    (chain-run response-chain
-                               'version
-                               response-version
-                               response))
-                   (code
-                    (chain-run response-chain
-                               'code
-                               response-code
-                               response))
-                   (reason-phrase
-                    (chain-run response-chain
-                               'reason-phrase
-                               response-reason-phrase
-                               response))
-                   (headers
-                    (chain-run response-chain
-                               'headers
-                               response-headers
-                               response))
-                   (response-body
-                    (chain-run response-chain
-                               'body
-                               response-body))
-                   (forged-response (build-response
-                                     #:version version
-                                     #:code    code
-                                     #:reason-phrase reason-phrase
-                                     #:headers       headers
-                                     #:validate-headers? #f)))
-              (log-debug "proxy-interceptor-run: forged response: ~S"
-                         response)
-              (write-response forged-response (session-record-port server))
-              (put-bytevector (session-record-port server)
-                              response-body)
-              (force-output (session-record-port server))
-              (bye server close-request/rdwr))))
-        (begin
-          (close (proxy-connection-client-port connection))))))
+  (let ((server (proxy-connection-tls-session connection)))
+    (when server
+      ;; Receive data over the TLS record layer.
+      (let* ((request (catch #t
+                        (lambda ()
+                          (read-request (session-record-port server)))
+                        (lambda (key . args)
+                          (log-error "proxy-interceptor-run: ~a: ~a~%"
+                                     key
+                                     args)
+                          (proxy-interceptor-make-session! interceptor connection)
+                          #f)))
+             (body     (and request
+                            (read-request-body request)))
+             (scenario (proxy-interceptor-chain interceptor)))
+        (log-debug "proxy-interceptor-run: received a request: ~a"
+                   request)
+        (if request
+            (let* ((request-chain  (chain-select scenario 'request))
+                   (response-chain (chain-select scenario 'response))
+                   (method  (chain-run request-chain 'method request-method request))
+                   (uri     (chain-run request-chain 'uri request-uri request))
+                   (version (chain-run request-chain 'version request-version request))
+                   (headers (chain-run request-chain 'headers request-headers request))
+                   (meta    (chain-run request-chain 'meta    request-meta request))
+                   (body    (chain-run request-chain 'body    body))
+                   (uri        (build-uri 'https
+                                          #:host (proxy-connection-host connection)
+                                          #:port (proxy-connection-port connection)
+                                          #:path (uri-path uri)
+                                          #:query (uri-query uri))))
+              (log-debug "proxy-interceptor-run: forged request: method: ~a; headers: ~a"
+                         method
+                         headers)
+              (log-debug "proxy-interceptor-run: uri: ~a" uri)
+              (log-debug "proxy-interceptor-run: chain: ~S" scenario)
+              (receive (response response-body)
+                  (http-request uri
+                                #:body body
+                                #:method method
+                                #:version version
+                                #:headers headers
+                                #:decode-body? #f)
+                (log-debug "proxy-interceptor-run: original response: ~S"
+                           response)
+                (let* ((version
+                        (chain-run response-chain
+                                   'version
+                                   response-version
+                                   response))
+                       (code
+                        (chain-run response-chain
+                                   'code
+                                   response-code
+                                   response))
+                       (reason-phrase
+                        (chain-run response-chain
+                                   'reason-phrase
+                                   response-reason-phrase
+                                   response))
+                       (headers
+                        (chain-run response-chain
+                                   'headers
+                                   response-headers
+                                   response))
+                       (response-body
+                        (chain-run response-chain
+                                   'body
+                                   response-body))
+                       (forged-response (build-response
+                                         #:version version
+                                         #:code    code
+                                         #:reason-phrase reason-phrase
+                                         #:headers       headers
+                                         #:validate-headers? #f)))
+                  (log-debug "proxy-interceptor-run: forged response: ~S"
+                             response)
+                  (write-response forged-response (session-record-port server))
+                  (put-bytevector (session-record-port server)
+                                  response-body)
+                  (force-output (session-record-port server))
+                  (bye server close-request/rdwr))))
+            (begin
+              (close (proxy-connection-client-port connection))))))))
 
 ;;; interceptor.scm ends here.
