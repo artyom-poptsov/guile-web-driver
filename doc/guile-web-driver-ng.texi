@@ -1116,18 +1116,77 @@ Possible request/response fields to handle:
 Possible actions:
 @itemize
 @item 'dump
-@item 'set
-@item <procedure>
-@end itemize
+Dump the content of a field to @code{stdout} or @code{stderr}.
 
-The set of parameters depends on the chosen action.  For ``dump'' action its a
-file name to dump the data into, or one of the following symbols:
+Parameters: one of the following symbols:
 @itemize
-@item stderr
-@item stdout
+@item @code{stdout} -- Dump data to the standard output stream.
+@item @code{stderr} -- Dump data to the standard error stream.
 @end itemize
 
-For ``set'' action the parameter must be the value to set the field to.
+@item 'set
+Replace the value of the field with the specified one.
+
+Parameters: the field value to be set.
+@item 'replace
+Replace the content of the field with the specified values.  This action only
+can be applied to the fields which values are associative lists.
+
+For example, if we have the following request headers:
+@example lisp
+'((User-Agent . "Firefox")
+  (Host       . "example.com))
+@end example
+
+we can replace the @code{User-Agent} field using the following proxy
+interceptor chain:
+@example lisp
+'((request headers replace ((User-Agent . "Chromium"))))
+@end example
+
+@item 'append
+Append new elements at the end of the specified field.  This action only can
+be applied to the fields which values are associative lists.
+
+For example, if we have the following request headers:
+@example lisp
+'((User-Agent . "Firefox")
+  (Host       . "example.com))
+@end example
+
+we can append the @code{Accept} field using the following proxy
+interceptor chain:
+@example lisp
+'((request headers replace ((Accept . "*/*"))))
+@end example
+
+@item 'delete
+Delete elements from the the specified field that match the element in the
+list specified as @code{<parameters>} value.  This action only can be applied
+to the fields which values are associative lists.
+
+For example, if we have the following request headers:
+@example lisp
+'((User-Agent . "Firefox")
+  (Host       . "example.com)
+  (Accept     . "*/*"))
+@end example
+
+we can delete @code{User-Agent} and @code{Accept} fields using the following
+proxy interceptor chain:
+@example lisp
+'((request headers delete (User-Agent Accept)))
+@end example
+
+@item <procedure>
+Apply a custom procedure to the field value.
+
+The procedure is called as follows:
+@example lisp
+(proc <interceptor-chain-rule> <previous-field-value>)
+@end example
+
+@end itemize
 
 Example of a simple interceptor chain:
 @example lisp
