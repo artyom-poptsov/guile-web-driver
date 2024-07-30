@@ -195,8 +195,8 @@ INTERCEPTOR.  Return two values: a X509 certificate and a private key."
               connection)
 
     (let ((priorities (proxy-interceptor-tls-session-priorities interceptor)))
-      (log-info "proxy-interceptor-make-session!: priorities: ~a"
-                priorities)
+      (log-debug "proxy-interceptor-make-session!: priorities: ~a"
+                 priorities)
       (set-session-priorities! server priorities))
 
     (log-debug "proxy-interceptor-make-session!: set-session-transport-fd!: ~a"
@@ -204,11 +204,12 @@ INTERCEPTOR.  Return two values: a X509 certificate and a private key."
     ;; Specify the underlying transport socket.
     (set-session-transport-fd! server (fileno client-port))
 
-    (log-debug "proxy-interceptor-make-session!: make-certificate-credentials")
+    (log-debug
+     "proxy-interceptor-make-session!: make-certificate-credentials...")
     ;; Create anonymous credentials.
     (let ((cred (make-certificate-credentials)))
       (log-debug
-       "proxy-interceptor-make-session!: make-certificate-credentials")
+       "proxy-interceptor-make-session!: make-certificate-credentials... done")
       (set-certificate-credentials-x509-keys! cred
                                               (list pub)
                                               sec)
@@ -232,7 +233,10 @@ INTERCEPTOR.  Return two values: a X509 certificate and a private key."
         (log-error "proxy-interceptor-make-session!: ~a: ~a~%"
                    key
                    args)
+        (log-debug "proxy-interceptor-make-session!: closing ports...")
         (close client-port)
+        (close target-port)
+        (log-debug "proxy-interceptor-make-session!: closing ports... done")
         (proxy-connection-tls-session-set! connection #f)))))
 
 (define-method (chain-run (chain <top>)
