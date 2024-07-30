@@ -260,13 +260,17 @@ procedure.  Return a forged field or the original field if a @var{chain} is
   "Intercept traffic flowing through a @var{connection} using an
 @var{interceptor}.  Return value is undefined."
   (unless (proxy-connection-tls-session connection)
-    (proxy-interceptor-make-session! interceptor connection))
+    (log-debug "proxy-interceptor-run: Creating a new TLS session...")
+    (proxy-interceptor-make-session! interceptor connection)
+    (log-debug "proxy-interceptor-run: Creating a new TLS session... done"))
 
   (let ((server (proxy-connection-tls-session connection)))
+    (log-debug "proxy-interceptor-run: TLS session: ~a" server)
     (when server
       ;; Receive data over the TLS record layer.
       (let* ((request (catch #t
                         (lambda ()
+                          (log-debug "proxy-interceptor-run: Reading request")
                           (read-request (session-record-port server)))
                         (lambda (key . args)
                           (log-error "proxy-interceptor-run: ~a: ~a~%"
