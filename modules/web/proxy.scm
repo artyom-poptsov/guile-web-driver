@@ -146,15 +146,18 @@
   (let* ((connections (proxy-connections proxy))
          (s  (socket PF_INET SOCK_STREAM 0))
          (ai (car (getaddrinfo host))))
+    (log-info "proxy-connect: Connecting to ~a:~a ..." host tcp-port)
     (connect s
              AF_INET
              (sockaddr:addr (addrinfo:addr ai))
              tcp-port)
+    (log-info "proxy-connect: Connecting to ~a:~a ... done" host tcp-port)
     (let ((conn (make <proxy-connection>
                   #:host host
                   #:port tcp-port
                   #:client client
                   #:target-port s)))
+      (log-info "proxy-connect: Connection: ~a" conn)
       (hash-set! connections
                  (make-key host tcp-port)
                  conn)
