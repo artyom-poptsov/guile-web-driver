@@ -158,7 +158,8 @@
 
 
 (define (import-key import-proc file)
-  "Import a key FILE using a procedure IMPORT-PROC, return the imported key."
+  "Import a key @var{file} using a procedure @var{import-proc}, return the
+imported key."
   (let* ((raw (get-bytevector-all (open-input-file file))))
     (import-proc raw x509-certificate-format/pem)))
 
@@ -184,6 +185,8 @@ INTERCEPTOR.  Return two values: a X509 certificate and a private key."
 
 (define-method (proxy-interceptor-make-session! (interceptor <proxy-interceptor>)
                                                 (connection <proxy-connection>))
+  "Make a new TLS session for an @var{interceptor} and a @var{connection}.
+Return value is undefined."
   (let ((server      (make-session connection-end/server))
         (client-port (proxy-connection-client-port connection))
         (target-port (proxy-connection-target-port connection))
@@ -243,8 +246,10 @@ INTERCEPTOR.  Return two values: a X509 certificate and a private key."
                           (field <symbol>)
                           (accessor <procedure>)
                           (message <top>))
-  "Run an interceptor CHAIN for a given FIELD.  Return forged field or the
-original field if a CHAIN is #f."
+  "Run an interceptor @var{chain} for a given @var{field} of a @var{message}
+object.  The @var{field} value is accessed using a provided @var{accessor}
+procedure.  Return a forged field or the original field if a @var{chain} is
+@code{#f}."
   (if chain
       (chain-run chain field (accessor message))
       (accessor message)))
@@ -252,6 +257,8 @@ original field if a CHAIN is #f."
 
 (define-method (proxy-interceptor-run (interceptor <proxy-interceptor>)
                                       (connection <proxy-connection>))
+  "Intercept traffic flowing through a @var{connection} using an
+@var{interceptor}.  Return value is undefined."
   (unless (proxy-connection-tls-session connection)
     (proxy-interceptor-make-session! interceptor connection))
 
