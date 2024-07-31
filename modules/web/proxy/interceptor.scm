@@ -222,25 +222,29 @@ Return value is undefined."
       (set-session-credentials! server cred))
 
     ;; Perform the TLS handshake with the client.
-    (catch 'gnutls-error
-      (lambda ()
-        (log-debug
-         "proxy-interceptor-make-session!: handshake with ~a ..."
-         server)
-        (handshake server)
-        (log-debug
-         "proxy-interceptor-make-session!: handshake with ~a ... done"
-         server)
-        (proxy-connection-tls-session-set! connection server))
-      (lambda (key . args)
-        (log-error "proxy-interceptor-make-session!: ~a: ~a~%"
-                   key
-                   args)
-        (log-debug "proxy-interceptor-make-session!: closing ports...")
-        (close client-port)
-        (close target-port)
-        (log-debug "proxy-interceptor-make-session!: closing ports... done")
-        (proxy-connection-tls-session-set! connection #f)))))
+    (let loop ((count 10))
+      (catch 'gnutls-error
+        (lambda ()
+          (log-debug
+           "proxy-interceptor-make-session!: handshake with ~a ..."
+           server)
+          (handshake server)
+          (log-debug
+           "proxy-interceptor-make-session!: handshake with ~a ... done"
+           server)
+          (proxy-connection-tls-session-set! connection server))
+        (lambda (key . args)
+          (log-error "proxy-interceptor-make-session!: ~a: ~a~%"
+                     key
+                     args)
+          (if (not (zero? count))
+              (loop (- count 1))
+              (begin
+                (log-debug "proxy-interceptor-make-session!: closing ports...")
+                (close client-port)
+                (close target-port)
+                (log-debug "proxy-interceptor-make-session!: closing ports... done")
+                (proxy-connection-tls-session-set! connection #f))))))))
 
 (define-method (chain-run (chain <top>)
                           (field <symbol>)
@@ -263,6 +267,8 @@ procedure.  Return a forged field or the original field if a @var{chain} is
     (log-debug "proxy-interceptor-run: Creating a new TLS session...")
     (proxy-interceptor-make-session! interceptor connection)
     (log-debug "proxy-interceptor-run: Creating a new TLS session... done"))
+
+  (rehandshake (proxy-connection-tls-session connection))
 
   (let ((server (proxy-connection-tls-session connection)))
     (log-debug "proxy-interceptor-run: TLS session: ~a" server)
@@ -346,10 +352,13 @@ procedure.  Return a forged field or the original field if a @var{chain} is
                              response)
                   (write-response forged-response (session-record-port server))
                   (force-output (session-record-port server))
-                  (write-response-body forged-response
-                                       response-body)
-                  (force-output (session-record-port server)) )))
+                  (format (current-error-port) "************ body length: ~S"
+                          (bytevector-length response-body))
+                  (when response-body
+                    (write-response-body forged-response response-body)
+                    (force-output (session-record-port server))) )))
                   ;; (bye server close-request/rdwr))))
+;                  (proxy-connection-tls-session-set! connection #f))))
             (begin
               (close (proxy-connection-client-port connection))))))))
 

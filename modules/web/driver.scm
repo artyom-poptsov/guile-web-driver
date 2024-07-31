@@ -39,6 +39,7 @@
   #:use-module (web response)
   #:use-module (web server)
   #:use-module (web driver common)
+  #:use-module (web driver log)
   #:use-module ((web driver error) #:prefix error:)
   #:use-module (web driver element)
   #:use-module (web driver rect)

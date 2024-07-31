@@ -203,31 +203,57 @@ errors."
 
 (define-method (proxy-intercept (proxy <proxy>)
                                 (connection <proxy-connection>))
-  "Intercept the traffic coming through a PROXY, replace HTTP headers on the way."
-  (let ((interceptor (proxy-interceptor proxy)))
-    (proxy-interceptor-run interceptor connection)))
+  "Intercept a @var{connection} traffic coming through a @var{proxy} with the
+proxy interceptor."
+  (let ((client-socket (proxy-connection-client-port connection))
+        (interceptor   (proxy-interceptor proxy)))
+    (while (not (port-closed? client-socket))
+      (proxy-interceptor-run interceptor connection))))
 
 (define-method (transfer-data (proxy <proxy>) (connection <proxy-connection>))
   "Transfer data through a PROXY."
   (define (client-to-destination client-socket)
-    (call-with-new-thread
-     (lambda ()
-       (while (not (port-closed? client-socket))
-         (proxy-intercept proxy connection)))))
+    (let ((buf (make-bytevector 1)))
+      (call-with-new-thread
+       (lambda ()
+         (let loop ((tx 0))
+           (catch #t
+             (lambda ()
+               (if (not (port-closed? client-socket))
+                   (let ((count (recv! client-socket buf)))
+                     (when (> count 0)
+                       (send (proxy-connection-target-port connection) buf)
+                       (loop (+ tx count))))
+                   (log-info "transfer-data: ~a tx ~a byte(s)"
+                             connection
+                             tx)))
+             (lambda (key . args)
+               (log-error "~a: ~a" key args)
+               (log-info "transfer-data: ~a tx ~a byte(s)"
+                         connection
+                         tx)
+               (close client-socket))))))))
 
   (define (destination-to-client client-socket)
     (let ((buf (make-bytevector 1)))
-      (while (not (port-closed? (proxy-connection-target-port connection)))
+      (let loop ((rx 0))
         (catch #t
           (lambda ()
-            (let ((count (recv! (proxy-connection-target-port connection)
-                                buf)))
-              (if (> count 0)
-                  (send client-socket buf)
-                  (begin
-                    (sleep 1)))))
+            (if (not (port-closed? (proxy-connection-target-port connection)))
+                (let ((count (recv! (proxy-connection-target-port connection)
+                                    buf)))
+                  (when (> count 0)
+                    (send client-socket buf)
+                    (loop (+ rx count))))
+                (log-info "transfer-data: ~a rx ~a byte(s)"
+                          connection
+                          rx)))
           (lambda (key . args)
-            (log-error "~a: ~a" key args))))))
+            (log-error "~a: ~a" key args)
+            (log-info "transfer-data: ~a rx ~a byte(s)"
+                      connection
+                      rx)
+            (close client-socket))))))
 
   (let ((client-socket (proxy-connection-client-port connection)))
     (client-to-destination client-socket)
@@ -282,7 +308,9 @@ errors."
              (let ((response (build-response)))
                (write-response response client-socket)
                (force-output client-socket)
-               (transfer-data proxy connection))
+               (if (proxy-interceptor proxy)
+                   (proxy-intercept proxy connection)
+                   (transfer-data proxy connection)))
              (log-error "handle-request: Could not connect to ~a:~a" host port))))
       (else
        (let* ((uri     (request-uri request))
