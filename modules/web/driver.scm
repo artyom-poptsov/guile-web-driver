@@ -39,6 +39,7 @@
   #:use-module (web response)
   #:use-module (web server)
   #:use-module (web driver common)
+  #:use-module (web driver log)
   #:use-module ((web driver error) #:prefix error:)
   #:use-module (web driver element)
   #:use-module (web driver rect)
@@ -144,12 +145,14 @@ localhost:8080."
 (define %chromedriver-arguments '("--silent"))
 (define (open-chromedriver capabilities)
   "Start chromedriver instance with the specified CAPABILITIES."
+  (log-info "open-chromedriver: capabilities: ~S" capabilities)
   (launch-and-open %chromedriver-command %chromedriver-arguments capabilities))
 
 (define %geckodriver-command "geckodriver")
 (define %geckodriver-arguments '("--log" "fatal"))
 (define (open-geckodriver capabilities)
   "Start geckgodriver instance with the specified CAPABILITIES."
+  (log-info "open-geckgodriver: capabilities: ~S" capabilities)
   (launch-and-open %geckodriver-command %geckodriver-arguments capabilities))
 
 
@@ -168,6 +171,7 @@ localhost:8080."
 (define *default-driver* (make-thread-local-fluid))
 
 (define* (open-web-driver #:key browser url headless capabilities)
+  (log-info "open-web-driver: browser: ~s url: ~a" browser url)
   (let ((driver
          (match (list browser url)
            ((#f (? identity url))
@@ -221,6 +225,7 @@ localhost:8080."
      (finalizer))))
 
 (define-public (close-web-driver . args)
+  (log-info "close-web-driver: ~S" args)
   (let ((driver (if (null? args) (fluid-ref *default-driver*) (car args))))
     (when driver
       (close driver))
@@ -315,6 +320,7 @@ localhost:8080."
    (vector->list (session-command driver 'GET "/window/handles"))))
 
 (define (new-window driver type)
+  (log-info "new-window: driver: ~s type: ~a" driver type)
   (web-driver-window
    driver
    (assoc-ref
@@ -328,6 +334,7 @@ localhost:8080."
   (new-window driver "tab"))
 
 (define-public-with-driver (switch-to driver target)
+  (log-info "new-window: driver: ~s target: ~a" driver target)
   (match target
     (('web-driver-window driver handle)
      (session-command driver 'POST "/window" `(("handle" . ,handle))))
@@ -383,6 +390,10 @@ localhost:8080."
 ;;; Elements
 
 (define (element-command element method path body-scm)
+  (log-info "element-command: element: ~a method: ~a path: ~a"
+            element
+            method
+            path)
   (match element
     (('web-driver-element driver element)
      (session-command driver
@@ -393,6 +404,10 @@ localhost:8080."
 ;;; Finding Elements
 
 (define (find-element driver using value)
+  (log-info "find-element: driver: ~a using: ~a value: ~a"
+            driver
+            using
+            value)
   (web-driver-element driver
                       (session-command driver
                                        'POST "/element"
