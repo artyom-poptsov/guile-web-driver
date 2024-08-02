@@ -298,11 +298,9 @@ proxy interceptor."
     (log-info "handle-request: method: ~a" method)
     (case method
       ((CONNECT)
-       (let* ((uri     (request-uri request))
-              (host    (symbol->string (uri-scheme uri)))
-              (port    (string->number (uri-path uri)))
-              (meta    (request-meta request))
-              (version (request-version request))
+       (let* ((uri        (request-uri request))
+              (host       (symbol->string (uri-scheme uri)))
+              (port       (string->number (uri-path uri)))
               (connection (proxy-connect! proxy client host port)))
          (if connection
              (let ((response (build-response)))
