@@ -309,7 +309,16 @@ proxy interceptor."
                (if (proxy-interceptor proxy)
                    (proxy-intercept proxy connection)
                    (transfer-data proxy connection)))
-             (log-error "handle-request: Could not connect to ~a:~a" host port))))
+             (let ((response (build-response
+                              #:code 502
+                              #:reason-phrase
+                              (format #f
+                                      "Could not connect to ~a:~a"
+                                      host
+                                      port))))
+               (log-error "handle-request: Could not connect to ~a:~a" host port)
+               (write-response response client-socket)
+               (force-output client-socket)))))
       (else
        (let* ((uri     (request-uri request))
               (host    (uri-host uri))
