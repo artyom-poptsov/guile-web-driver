@@ -268,8 +268,6 @@ proxy interceptor."
          (port          (string->number (uri-path uri)))
          (meta          (request-meta request))
          (version       (request-version request)))
-    (display headers)
-    (newline)
     (receive (response response-body)
         (http-request uri
                       #:method  method
