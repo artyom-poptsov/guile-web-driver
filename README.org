@@ -59,8 +59,8 @@ guix package -f ./guix.scm
 
 ** Documentation
 Full documentation for the library is available in Info format -- you can open
-it by typing =info guile-web-driver-ng= in the shell, or by using =C-h i m
-guile-web-driver-ng RET= combo in Emacs.
+it by typing =info guile-web-driver-ng= in the shell, or by using
+=C-h i m guile-web-driver-ng RET= combo in Emacs.
 
 You can find =(web driver)= module documentation below.  Note that it does not
 document the proxy.
