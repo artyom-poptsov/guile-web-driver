@@ -55,4 +55,8 @@ EXTRA_DIST = \
 	${SCM_TESTS}
 
 CLEANFILES = \
-	*.log
+	web/*.log \
+	web/driver/*.log \
+	web/proxy/*.log \
+	web/proxy/interceptor/*.log
+
