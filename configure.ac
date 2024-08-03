@@ -21,7 +21,7 @@ You should have received a copy of the GNU General Public License
 along with Guile-Web-Driver.  If not, see <http://www.gnu.org/licenses/>.
 ]])
 
-AC_INIT([Guile-Web-Driver-NG], [0.1], [poptsov.artyom@gmail.com],
+AC_INIT([Guile-Web-Driver-NG], [1.0.0], [poptsov.artyom@gmail.com],
                      [guile-web-driver-ng],
                      [https://github.com/artyom-poptsov/guile-web-driver-ng])
 

@@ -8,17 +8,29 @@ Copyright (C) 2024 Artyom V. Poptsov <poptsov.artyom@gmail.com>
   are permitted in any medium without royalty provided the copyright
   notice and this notice are preserved.
 
-* Unreleased
+* Version 1.0.0 (2024-08-03)
+** Change the project name to Guile-Web-Driver-NG
+"NG" stands for "Next Generation".  Not a very original name indeed, but it
+helps to distinguish this fork from the original project.
 ** Migrate to GNU Autotools
-This allows to build the project in more convenient way.
-** Implement intercepting proxy
-Implement intercepting (MITM) proxy that allows to inspect and modify HTTP requests
-and responses.
+This allows to build the project in a more convenient way.
+** Implement an intercepting proxy
+Implement an intercepting (MITM) proxy that allows to inspect and modify HTTP
+and HTTPS requests/responses.
+
+Special "interceptor chains" can be set for a proxy interceptor that allow to
+apply different actions to requests and responses in sequence.  The design is
+partly inspired by Linux iptables.  Each rule in a chain specifies a field to
+process, an action to apply to the field and action parameters.  When a proxy
+has no traffic interceptor it runs like a regular proxy that forwards traffic
+between a client and a server.
+
+Examples of proxy usage can be found in the Info documentation.
 ** Split =driver.scm= into several modules
 ** Add GNU Guix recipe
-Now the latest version of the project can be built with =guix build -f
-./guix.scm=.
-** Add Texinfo documentation
+Now the latest version of the project can be built with
+=guix build -f ./guix.scm=
+** Add Info documentation
 ** Implement SRFI-64 tests
 
 Local Variables:
