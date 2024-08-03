@@ -22,4 +22,8 @@ cert_DATA = \
 	cert.pem \
 	key.pem
 
+EXTRA_DIST = \
+	cert.pem \
+	key.pem
+
 ### Makefile.am ends here.
