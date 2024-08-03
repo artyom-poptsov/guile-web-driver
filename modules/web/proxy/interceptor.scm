@@ -57,6 +57,7 @@
   #:use-module (web proxy config)
   #:use-module (web proxy connection)
   #:use-module (web proxy interceptor chain)
+  #:use-module (web proxy interceptor forger)
   #:export (<proxy-interceptor>
             proxy-interceptor-chain
             proxy-interceptor-tls-session-priorities
@@ -284,70 +285,43 @@ procedure.  Return a forged field or the original field if a @var{chain} is
         (log-debug "proxy-interceptor-run: received a request: ~a"
                    request)
         (if request
-            (let* ((request-chain  (chain-select scenario 'request))
-                   (response-chain (chain-select scenario 'response))
-                   (method  (chain-run request-chain 'method request-method request))
-                   (uri     (chain-run request-chain 'uri request-uri request))
-                   (version (chain-run request-chain 'version request-version request))
-                   (headers (chain-run request-chain 'headers request-headers request))
-                   (meta    (chain-run request-chain 'meta    request-meta request))
-                   (body    (chain-run request-chain 'body    body))
-                   (uri        (build-uri 'https
-                                          #:host (proxy-connection-host connection)
-                                          #:port (proxy-connection-port connection)
-                                          #:path (uri-path uri)
-                                          #:query (uri-query uri))))
+            (let* ((forged-request (forge-request scenario request body))
+                   (uri (forged-message-uri forged-request))
+                   (uri (build-uri 'https
+                                   #:host (proxy-connection-host connection)
+                                   #:port (proxy-connection-port connection)
+                                   #:path (uri-path uri)
+                                   #:query (uri-query uri))))
               (log-debug "proxy-interceptor-run: forged request: method: ~a; headers: ~a"
-                         method
-                         headers)
+                         (forged-message-method forged-request)
+                         (forged-message-headers forged-request))
               (log-debug "proxy-interceptor-run: uri: ~a" uri)
               (log-debug "proxy-interceptor-run: chain: ~S" scenario)
               (receive (response response-body)
                   (http-request uri
-                                #:body body
-                                #:method method
-                                #:version version
-                                #:headers headers
+                                #:body (forged-message-body forged-request)
+                                #:method (forged-message-method forged-request)
+                                #:version (forged-message-version forged-request)
+                                #:headers (forged-message-headers forged-request)
                                 #:decode-body? #f)
                 (log-debug "proxy-interceptor-run: original response: ~S"
                            response)
-                (let* ((version
-                        (chain-run response-chain
-                                   'version
-                                   response-version
-                                   response))
-                       (code
-                        (chain-run response-chain
-                                   'code
-                                   response-code
-                                   response))
-                       (reason-phrase
-                        (chain-run response-chain
-                                   'reason-phrase
-                                   response-reason-phrase
-                                   response))
-                       (headers
-                        (chain-run response-chain
-                                   'headers
-                                   response-headers
-                                   response))
-                       (response-body
-                        (chain-run response-chain
-                                   'body
-                                   response-body))
-                       (forged-response (build-response
-                                         #:version version
-                                         #:code    code
-                                         #:reason-phrase reason-phrase
-                                         #:headers       headers
-                                         #:validate-headers? #f
-                                         #:port (session-record-port server))))
+                (let* ((forged-response (forge-response scenario
+                                                        response
+                                                        response-body))
+                       (response (build-response
+                                  #:version (forged-message-version forged-response)
+                                  #:code    (forged-message-code forged-response)
+                                  #:reason-phrase (forged-message-reason-phrase forged-response)
+                                  #:headers       (forged-message-headers forged-response)
+                                  #:validate-headers? #f
+                                  #:port (session-record-port server))))
                   (log-debug "proxy-interceptor-run: forged response: ~S"
                              response)
-                  (write-response forged-response (session-record-port server))
+                  (write-response response (session-record-port server))
                   (force-output (session-record-port server))
-                  (write-response-body forged-response
-                                       response-body)
+                  (write-response-body response
+                                       (forged-message-body forged-response))
                   (force-output (session-record-port server)) )))
                   ;; (bye server close-request/rdwr))))
             (begin

@@ -19,7 +19,8 @@
 include $(top_srcdir)/build-aux/am/guile.am
 
 SOURCES = \
-	chain.scm
+	chain.scm	\
+	forger.scm
 
 moddir=$(prefix)/share/guile/site/$(GUILE_EFFECTIVE_VERSION)/web/proxy/interceptor/
 godir=$(libdir)/guile/$(GUILE_EFFECTIVE_VERSION)/site-ccache/web/proxy/interceptor/
