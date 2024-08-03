@@ -19,7 +19,7 @@
 
 info_TEXINFOS = guile-web-driver-ng.texi
 
-guile_dsv_TEXINFOS = \
+guile_web_driver_ng_TEXINFOS = \
 	guile-web-driver-ng.texi \
 	indices.texi \
 	fdl.texi
