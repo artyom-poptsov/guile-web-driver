@@ -320,9 +320,10 @@ procedure.  Return a forged field or the original field if a @var{chain} is
                              response)
                   (write-response response (session-record-port server))
                   (force-output (session-record-port server))
-                  (write-response-body response
-                                       (forged-message-body forged-response))
-                  (force-output (session-record-port server)) )))
+                  (when (forged-message-body forged-response)
+                    (write-response-body response
+                                         (forged-message-body forged-response))
+                    (force-output (session-record-port server)) ))))
                   ;; (bye server close-request/rdwr))))
             (begin
               (close (proxy-connection-client-port connection))))))))
