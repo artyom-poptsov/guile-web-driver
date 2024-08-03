@@ -16,6 +16,8 @@
 ## You should have received a copy of the GNU General Public License
 ## along with Guile-Web-Driver.  If not, see <http://www.gnu.org/licenses/>.
 
+AUTOMAKE_OPTIONS = gnu
+
 ACLOCAL_AMFLAGS = -I build-aux
 
 SUBDIRS = build-aux modules/web tests doc cert
