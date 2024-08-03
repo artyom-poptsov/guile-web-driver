@@ -255,6 +255,56 @@ procedure.  Return a forged field or the original field if a @var{chain} is
       (chain-run chain field (accessor message))
       (accessor message)))
 
+(define-method (proxy-interceptor-run (interceptor <proxy-interceptor>)
+                                      (connection <proxy-connection>)
+                                      request
+                                      body)
+  (let* ((chain          (proxy-interceptor-chain interceptor))
+         (forged-request (forge-request chain request body))
+         (uri            (forged-message-uri forged-request))
+         (uri (build-uri 'https
+                         #:host  (proxy-connection-host connection)
+                         #:port  (proxy-connection-port connection)
+                         #:path  (uri-path uri)
+                         #:query (uri-query uri))))
+    (log-debug "proxy-interceptor-run: forged request: method: ~a; headers: ~a"
+               (forged-message-method forged-request)
+               (forged-message-headers forged-request))
+    (log-debug "proxy-interceptor-run: uri: ~a" uri)
+    (log-debug "proxy-interceptor-run: chain: ~S" chain)
+    (receive (response response-body)
+        (http-request uri
+                      #:body (forged-message-body forged-request)
+                      #:method (forged-message-method forged-request)
+                      #:version (forged-message-version forged-request)
+                      #:headers (forged-message-headers forged-request)
+                      #:port (proxy-connection-target-port connection)
+                      #:keep-alive? #t
+                      #:decode-body? #f)
+      (log-debug "proxy-interceptor-run: original response: ~S"
+                 response)
+      (let* ((forged-response (forge-response chain response response-body))
+             (client-socket   (proxy-connection-client-port connection))
+             (response (build-response
+                        #:version (forged-message-version forged-response)
+                        #:code    (forged-message-code forged-response)
+                        #:reason-phrase (forged-message-reason-phrase forged-response)
+                        #:headers       (forged-message-headers forged-response)
+                        #:validate-headers? #f
+                        #:port client-socket)))
+        (log-debug "proxy-interceptor-run: forged response: ~S"
+                   response)
+        (catch #t
+          (lambda ()
+            (write-response response client-socket)
+            (force-output client-socket)
+            (when (forged-message-body forged-response)
+              (write-response-body response
+                                   (forged-message-body forged-response))
+              (force-output client-socket)))
+          (lambda (key . args)
+            (log-error "proxy-interceptor-run: ~a: ~a" key args)))))))
+
 
 (define-method (proxy-interceptor-run (interceptor <proxy-interceptor>)
                                       (connection <proxy-connection>))
