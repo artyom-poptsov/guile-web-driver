@@ -210,6 +210,15 @@ proxy interceptor."
     (while (not (port-closed? client-socket))
       (proxy-interceptor-run interceptor connection))))
 
+(define-method (proxy-intercept (proxy <proxy>)
+                                (connection <proxy-connection>)
+                                request
+                                body)
+  "Intercept a @var{connection} traffic coming through a @var{proxy} with the
+proxy interceptor."
+  (let ((interceptor (proxy-interceptor proxy)))
+    (proxy-interceptor-run interceptor connection request body)))
+
 (define-method (transfer-data (proxy <proxy>) (connection <proxy-connection>))
   "Transfer data through a PROXY."
   (define (client-to-destination client-socket)
@@ -330,7 +339,9 @@ proxy interceptor."
                              (else
                               (error "Unknown scheme" scheme)))))
               (connection (proxy-connect! proxy client host port)))
-         (forward-request proxy connection request body))))))
+         (if (proxy-interceptor proxy)
+             (proxy-intercept proxy connection request body)
+             (forward-request proxy connection request body)))))))
 
 (define-method (proxy-handle-client (proxy <proxy>) client)
   "Handle a TCP/IP CLIENT connected to a PROXY."
