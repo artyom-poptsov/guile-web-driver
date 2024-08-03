@@ -47,6 +47,9 @@ GUILE_PKG([3.0 2.2])
 GUILE_PROGS
 GUILE_SITE_DIR
 
+dnl Check for Guile-Library.
+GUILE_MODULE_REQUIRED([scheme documentation])
+
 if test "x$guilesitedir" = "x"; then
    guilesitedir="$datadir/guile/site/$GUILE_EFFECTIVE_VERSION"
 fi
