@@ -57,6 +57,7 @@ Documentation License.''
 * Introduction::
 * Installation::
 * API Reference::
+* Examples::
 
 Appendices
 
@@ -1221,6 +1222,94 @@ Possible types are: @code{request}, @code{response}.
 @deffn {Scheme Procedure} chain-run (chain <list>) (field <symbol>) object
 Run a @var{chain} on a @var{field} with a value @var{object}.
 @end deffn
+
+@c -----------------------------------------------------------------------------
+@node Examples
+@chapter Examples
+
+The example below shows how to use the intercepting proxy:
+
+@example lisp
+(use-modules (web proxy)
+             (web proxy interceptor)
+             (oop goops))
+
+(define (main args)
+  (let ((p (make <proxy>
+             #:port 8081
+             #:interceptor (make <proxy-interceptor>
+                             #:chain '((request headers dump stderr)
+                                       (request headers delete (accept-encoding))
+                                       (request headers replace ((User-Agent . "Mozilla")))
+                                       (response headers delete (transfer-encoding)))
+                             #:x509-certificate-file "cert/cert.pem"
+                             #:x509-private-key-file "cert/key.pem"))))
+    (proxy-start! p)
+    (display "Proxy is running\n")
+    (while #t (sleep 1))))
+@end example
+
+The interceptor chain is specified as:
+
+@example lisp
+'((request headers dump stderr)
+  (request headers delete (accept-encoding))
+  (request headers replace ((User-Agent . "Mozilla")))
+  (response headers delete (transfer-encoding)))
+@end example
+
+This chain has two sub-chains: one for request handling and one for the
+response handling.
+
+The first rule for the request sub-chain is to dump request headers to
+@code{stderr}.  Then proxy deletes @code{accept-encoding} header, and then
+replaces the value of @code{User-Agent} header with ``Mozilla''.  For the
+response sub-chain we just delete @code{transfer-encoding} header.
+
+@section Chunked Transfer Encoding
+
+The rationale behind deleting @code{accept-encoding} and
+@code{transfer-encoding} is that we need to handle
+@url{https://datatracker.ietf.org/doc/html/rfc9112#section-7.1, Chunked
+Transfer Encoding} properly, otherwise our client (a browser) will issue
+@code{ERR_INVALID_CHUNKED_ENCODING} errors.
+
+When a server uses Chunked Transfer Encoding it sends @code{Transfer-Encoding:
+chunked} header in responses.
+
+In this case we probably want to modify the request and the response headers:
+first of all we delete @code{accept-encoding} header from the request, then we
+delete @code{transfer-encoding} header from the response.  It can be done with
+the following minimal interceptor chain:
+
+@example lisp
+'((request headers delete (accept-encoding))
+  (response headers delete (transfer-encoding)))
+@end example
+
+@section Running a browser with a proxy
+
+To run Chromium browser with our intercepting proxy we may use the following
+command:
+
+@example bash
+chromium --ignore-certificate-errors --proxy-server=127.0.0.1:8081 https://example.com/
+@end example
+
+Where @code{--ignore-certificate-errors} option disables certificate check in
+the browser (which is dangerous in normal circumstances.)  Here we need this
+option to use a self-signed certificate which in turn allows us to intercept
+the traffic flowing through our proxy.  Another way is to add our self-signed
+certificate a browser or to the system.
+
+Basically what we do here is called a
+@url{https://en.wikipedia.org/wiki/Man-in-the-middle_attack, MITM attack} --
+@emph{never} ever accept any certificate in your browser nor install any
+certificates to your system unless you fully trust the issuer.
+
+@code{--proxy-server} sets the proxy server (let's suppose that ours runs on
+@code{127.0.0.1:8081}) and the last argument is a site URL to open -- in our
+case it is @url{https://example.com/}.
 
 @c -----------------------------------------------------------------------------
 @node GNU Free Documentation License
