@@ -45,6 +45,7 @@
              (gnu packages guile-xyz)
              (gnu packages pkg-config)
              (gnu packages texinfo)
+             (gnu packages texlive)
              (gnu packages tls)
              (gnu packages man)
 
@@ -70,6 +71,7 @@
           automake
           pkg-config
           texinfo
+          texlive
           ;; needed when cross-compiling.
           guile-lib
           guile-json-4
