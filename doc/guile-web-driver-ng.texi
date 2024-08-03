@@ -11,6 +11,7 @@
 This manual documents Guile-Web-Driver-NG version @value{VERSION}.
 
 Copyright (C) 2019-2024 Michal Herko
+
 Copyright (C) 2024 Artyom V. Poptsov
 
 Permission is granted to copy, distribute and/or modify this document
