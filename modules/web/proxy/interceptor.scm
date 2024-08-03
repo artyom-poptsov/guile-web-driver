@@ -303,6 +303,7 @@ procedure.  Return a forged field or the original field if a @var{chain} is
                                 #:method (forged-message-method forged-request)
                                 #:version (forged-message-version forged-request)
                                 #:headers (forged-message-headers forged-request)
+                                #:keep-alive? #t
                                 #:decode-body? #f)
                 (log-debug "proxy-interceptor-run: original response: ~S"
                            response)
@@ -318,13 +319,19 @@ procedure.  Return a forged field or the original field if a @var{chain} is
                                   #:port (session-record-port server))))
                   (log-debug "proxy-interceptor-run: forged response: ~S"
                              response)
-                  (write-response response (session-record-port server))
-                  (force-output (session-record-port server))
-                  (when (forged-message-body forged-response)
-                    (write-response-body response
-                                         (forged-message-body forged-response))
-                    (force-output (session-record-port server)) ))))
-                  ;; (bye server close-request/rdwr))))
+                  (catch #t
+                    (lambda ()
+                      (write-response response (session-record-port server))
+                      (force-output (session-record-port server))
+                      (when (forged-message-body forged-response)
+                        (write-response-body response
+                                             (forged-message-body forged-response))
+                        (force-output (session-record-port server))
+                        (bye server close-request/rdwr)))
+                    (lambda (key . args)
+                      (close (session-record-port server))
+                      (proxy-connection-tls-session-set! connection #f)
+                      (log-error "proxy-interceptor-run: ~a: ~a" key args))))))
             (begin
               (close (proxy-connection-client-port connection))))))))
 
