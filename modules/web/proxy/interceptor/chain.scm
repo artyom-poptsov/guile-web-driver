@@ -77,7 +77,6 @@ the @var{rule} parameters.  Return new object."
   "Append new elements from a @var{rule} to elements of an associative list
 @var{old-object}.  Return new object."
   (let ((new-elements (rule:parameters rule)))
-    (format (current-error-port) "old: ~S; elem: ~S~%" old-object new-elements)
     ((@@ (guile) append) old-object new-elements)))
 
 (define-method (delete (rule <list>) old-object)
