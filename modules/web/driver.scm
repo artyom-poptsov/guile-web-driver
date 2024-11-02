@@ -86,7 +86,8 @@ localhost:8080."
         (lambda ()
           (http-request uri #:method method #:body body-bytevector))
       (lambda (response body)
-        (let ((value (assoc-ref (json-string->scm (bytevector->string body "utf-8"))
+        (let ((value (assoc-ref (json-string->scm
+                                 (bytevector->string body "utf-8"))
                                 "value")))
           (if (equal? 200 (response-code response))
               value
@@ -137,7 +138,8 @@ localhost:8080."
 
 (define (launch-and-open command args capabilities)
   (let* ((port (free-listen-port))
-         (pipe (apply open-pipe* OPEN_WRITE command (format #f "--port=~a" port) args))
+         (pipe (apply open-pipe* OPEN_WRITE command (format #f "--port=~a" port)
+                      args))
          (uri (format #f "http://localhost:~a" port)))
     (open* uri (lambda () (close-driver-pipe pipe)) capabilities)))
 
@@ -220,7 +222,9 @@ localhost:8080."
              path)
   (match driver
     (('web-driver driver-uri session-id finalizer)
-     (request method (format #f "~a/session/~a~a" driver-uri session-id path) body-scm))))
+     (request method
+              (format #f "~a/session/~a~a" driver-uri session-id path)
+              body-scm))))
 
 (define (close driver)
   (match driver
@@ -271,13 +275,17 @@ localhost:8080."
     (#nil #:never)
     ('null #:never)))
 
-(define-public-with-driver (set-page-load-timeout driver #:optional (timeout 300000))
+(define-public-with-driver (set-page-load-timeout driver
+                                                  #:optional
+                                                  (timeout 300000))
   (session-command driver 'POST "/timeouts" `(("pageLoad" . ,timeout))))
 
 (define-public-with-driver (get-page-load-timeout driver)
   (assoc-ref (session-command driver 'GET "/timeouts" #f) "pageLoad"))
 
-(define-public-with-driver (set-implicit-timeout driver #:optional (timeout 0))
+(define-public-with-driver (set-implicit-timeout driver
+                                                 #:optional
+                                                 (timeout 0))
   (session-command driver 'POST "/timeouts" `(("implicit" . ,timeout))))
 
 (define-public-with-driver (get-implicit-timeout driver)
@@ -344,7 +352,8 @@ localhost:8080."
      (session-command driver 'POST "/window" `(("handle" . ,handle))))
     (('web-driver-element driver element)
      (session-command driver 'POST "/frame"
-                      `(("id" . (("element-6066-11e4-a52e-4f735466cecf" . ,element))))))
+                      `(("id" . (("element-6066-11e4-a52e-4f735466cecf"
+                                  . ,element))))))
     ((? number? n)
      (session-command driver 'POST "/frame" `(("id" . ,n))))))
 
@@ -467,13 +476,17 @@ localhost:8080."
 (define-finder element-by-class-name elements-by-class-name
   "css selector" (lambda (class-name) (string-append "." class-name)))
 
-(define-finder element-by-tag-name elements-by-tag-name "tag name")
+(define-finder element-by-tag-name elements-by-tag-name
+  "tag name")
 
-(define-finder element-by-link-text elements-by-link-text "link text")
+(define-finder element-by-link-text elements-by-link-text
+  "link text")
 
-(define-finder element-by-partial-link-text elements-by-partial-link-text "partial link text")
+(define-finder element-by-partial-link-text elements-by-partial-link-text
+  "partial link text")
 
-(define-finder element-by-xpath elements-by-xpath "xpath")
+(define-finder element-by-xpath elements-by-xpath
+  "xpath")
 
 (define-public-with-driver (element-by-label-text driver text #:key from)
   (element-by-xpath driver
@@ -504,16 +517,28 @@ localhost:8080."
   (element-command element 'GET "/selected" #f))
 
 (define-public (attribute element name)
-  (fold-null (element-command element 'GET (format #f "/attribute/~a" name) #f)))
+  (fold-null (element-command element
+                              'GET
+                              (format #f "/attribute/~a" name)
+                              #f)))
 
 (define-public (property element name)
-  (fold-null (element-command element 'GET (format #f "/property/~a" name) #f)))
+  (fold-null (element-command element
+                              'GET
+                              (format #f "/property/~a" name)
+                              #f)))
 
 (define-public (css-value element name)
-  (element-command element 'GET (format #f "/css/~a" name) #f))
+  (element-command element
+                   'GET
+                   (format #f "/css/~a" name)
+                   #f))
 
 (define-public-with-driver (text driver #:optional element)
-  (element-command (or element (element-by-tag-name "body")) 'GET "/text" #f))
+  (element-command (or element (element-by-tag-name "body"))
+                   'GET
+                   "/text"
+                   #f))
 
 (define-public (tag-name element)
   (element-command element 'GET "/name" #f))
@@ -655,11 +680,13 @@ localhost:8080."
     (session-command driver 'DELETE "/actions"))
   (define (perform-actions key-actions mouse-actions actions)
     (define (key-action action)
-      (perform-actions
-       (cons action key-actions) (cons pause-action mouse-actions) (cdr actions)))
+      (perform-actions (cons action key-actions)
+                       (cons pause-action mouse-actions)
+                       (cdr actions)))
     (define (mouse-action action)
-      (perform-actions
-       (cons pause-action key-actions) (cons action mouse-actions) (cdr actions)))
+      (perform-actions (cons pause-action key-actions)
+                       (cons action mouse-actions)
+                       (cdr actions)))
     (define (key-action/key-down unicode-char)
       (key-action `(("type" . "keyDown") ("value" . ,unicode-char))))
     (define (key-action/key-up unicode-char)
