@@ -214,6 +214,10 @@ localhost:8080."
        (lambda (key . args) #f)))))
 
 (define* (session-command driver method path #:optional (body-scm '()))
+  (log-debug "session-command: driver: ~s method: ~a path: ~a"
+             driver
+             method
+             path)
   (match driver
     (('web-driver driver-uri session-id finalizer)
      (request method (format #f "~a/session/~a~a" driver-uri session-id path) body-scm))))
