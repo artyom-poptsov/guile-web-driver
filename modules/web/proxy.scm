@@ -205,8 +205,10 @@ errors."
                                 (connection <proxy-connection>))
   "Intercept a @var{connection} traffic coming through a @var{proxy} with the
 proxy interceptor."
+  (log-debug "proxy-intercept: proxy: ~a, conn: ~a" proxy connection)
   (let ((client-socket (proxy-connection-client-port connection))
         (interceptor   (proxy-interceptor proxy)))
+    (log-debug "proxy-intercept: interceptor: ~a" interceptor)
     (while (not (port-closed? client-socket))
       (proxy-interceptor-run interceptor connection))))
 
@@ -216,7 +218,12 @@ proxy interceptor."
                                 body)
   "Intercept a @var{connection} traffic coming through a @var{proxy} with the
 proxy interceptor."
+  (log-debug "proxy-intercept: proxy: ~a, conn: ~a, req: ~a"
+             proxy
+             connection
+             request)
   (let ((interceptor (proxy-interceptor proxy)))
+    (log-debug "proxy-intercept: interceptor: ~a" interceptor)
     (proxy-interceptor-run interceptor connection request body)))
 
 (define-method (transfer-data (proxy <proxy>) (connection <proxy-connection>))
