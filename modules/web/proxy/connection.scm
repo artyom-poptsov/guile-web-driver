@@ -81,7 +81,8 @@
 
 (define-method (%display (connection <proxy-connection>) (port <port>))
   (format port
-          "#<proxy-connection ~a:~a ~a>"
+          "#<proxy-connection client: ~a target: ~a:~a ~a>"
+          (proxy-connection-client connection)
           (proxy-connection-host connection)
           (proxy-connection-port connection)
           (object-address/hex-string connection)))
