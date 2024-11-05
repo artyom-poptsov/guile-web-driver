@@ -21,9 +21,11 @@
     #:x509-private-key-file %key))
 
 (test-assert "display"
-  (display (make <proxy-interceptor>
-             #:x509-certificate-file %certificate
-             #:x509-private-key-file %key)))
+  (with-output-to-string
+    (lambda ()
+      (display (make <proxy-interceptor>
+                 #:x509-certificate-file %certificate
+                 #:x509-private-key-file %key)))))
 
 
 (define exit-status (test-runner-fail-count (test-runner-current)))

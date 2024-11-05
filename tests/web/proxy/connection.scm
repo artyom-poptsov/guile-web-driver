@@ -13,7 +13,9 @@
   (make <proxy-connection>))
 
 (test-assert "display"
-  (display (make <proxy-connection>)))
+  (with-output-to-string
+    (lambda ()
+      (display (make <proxy-connection>)))))
 
 (test-equal "proxy-connection-client-port"
   (current-error-port)
