@@ -79,6 +79,8 @@ localhost:8080."
             (list #:socket server-socket)))))))
 
 (define (request method uri body-scm)
+  (log-debug "request: method: ~a uri: ~a"
+             method uri)
   (let* ((body-string (scm->json-string body-scm))
          (body-bytevector (and body-scm
                                (request-body->bytevector body-string))))
@@ -89,6 +91,7 @@ localhost:8080."
         (let ((value (assoc-ref (json-string->scm
                                  (bytevector->string body "utf-8"))
                                 "value")))
+          (log-debug "request: response-code: ~a" (response-code response))
           (if (equal? 200 (response-code response))
               value
               (let ((error (assoc-ref value "error"))
