@@ -23,6 +23,15 @@
   #vu8(104 101 108 108 111)
   (request-body->bytevector "hello"))
 
+(test-equal "bytevector->utf-8"
+  "hello"
+  (bytevector->utf-8 #vu8(104 101 108 108 111)))
+
+(test-equal "json-bytevector->scm"
+  '(("key" . "value"))
+  (json-bytevector->scm
+   #vu8(123 34 107 101 121 34 58 34 118 97 108 117 101 34 125)))
+
 
 (define exit-status (test-runner-fail-count (test-runner-current)))
 
