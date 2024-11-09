@@ -88,9 +88,7 @@ localhost:8080."
         (lambda ()
           (http-request uri #:method method #:body body-bytevector))
       (lambda (response body)
-        (let ((value (assoc-ref (json-string->scm
-                                 (bytevector->string body "utf-8"))
-                                "value")))
+        (let ((value (assoc-ref (json-bytevector->scm body) "value")))
           (log-debug "request: response-code: ~a" (response-code response))
           (if (equal? 200 (response-code response))
               value
