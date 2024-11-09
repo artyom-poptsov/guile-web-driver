@@ -37,6 +37,12 @@
   #:export (request
             session-command
 
+            session-timeouts
+            session-timeouts/implicit
+            session-timeouts/page-load
+            session-timeouts/script
+            session-timeouts-set!
+
             make-session-uri
             make-status-uri
             make-element-uri
@@ -112,5 +118,48 @@
      (request method
               (make-session-uri driver-uri session-id path)
               body-scm))))
+
+
+;; See <https://developer.mozilla.org/en-US/docs/Web/WebDriver/Timeouts>
+
+(define %timeouts-path      "/timeouts")
+(define %timeouts:page-load "pageLoad")
+(define %timeouts:implicit  "implicit")
+(define %timeouts:script    "script")
+
+(define (session-timeouts driver)
+  "Get session timeouts for a DRIVER."
+  (session-command driver 'GET %timeouts-path #f))
+
+(define (session-timeouts/page-load driver)
+  "Get the session page load timeout for a DRIVER."
+  (assoc-ref (session-timeouts driver) %timeouts:page-load))
+
+(define (session-timeouts/implicit driver)
+  "Get the session implicit timeout for a DRIVER."
+  (assoc-ref (session-timeouts driver) %timeouts:implicit))
+
+(define (session-timeouts/script driver)
+  "Get the session script timeout for a DRIVER."
+  (assoc-ref (session-timeouts driver) %timeouts:script))
+
+(define* (session-timeouts-set! driver
+                                #:key
+                                page-load
+                                implicit
+                                script)
+  (let* ((data '())
+         (data (if page-load
+                   (cons `(,%timeouts:page-load . ,page-load) data)
+                   data))
+         (data (if implicit
+                   (cons `(,%timeouts:implicit . ,implicit) data)
+                   data))
+         (data (if script
+                   (cons `(,%timeouts:script . ,script) data)
+                   data)))
+    (when (null? data)
+      (error:web-driver-error "No timeouts provided"))
+  (session-command driver 'POST %timeouts-path data)))
 
 ;;; request.scm ends here.

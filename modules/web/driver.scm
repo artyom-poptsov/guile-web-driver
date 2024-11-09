@@ -237,10 +237,10 @@ localhost:8080."
 
 (define-public-with-driver (set-script-timeout driver #:optional timeout)
   (let ((value (match timeout ((? number? n) n) (#f 30000) (#:never 'null))))
-    (session-command driver 'POST "/timeouts" `(("script" . ,value)))))
+    (session-timeouts-set! driver #:script value)))
 
 (define-public-with-driver (get-script-timeout driver)
-  (match (assoc-ref (session-command driver 'GET "/timeouts" #f) "script")
+  (match (session-timeouts/script driver)
     ((? number? n) n)
     (#nil #:never)
     ('null #:never)))
@@ -248,18 +248,18 @@ localhost:8080."
 (define-public-with-driver (set-page-load-timeout driver
                                                   #:optional
                                                   (timeout 300000))
-  (session-command driver 'POST "/timeouts" `(("pageLoad" . ,timeout))))
+  (session-timeouts-set! driver #:page-load timeout))
 
 (define-public-with-driver (get-page-load-timeout driver)
-  (assoc-ref (session-command driver 'GET "/timeouts" #f) "pageLoad"))
+  (session-timeouts/page-load driver))
 
 (define-public-with-driver (set-implicit-timeout driver
                                                  #:optional
                                                  (timeout 0))
-  (session-command driver 'POST "/timeouts" `(("implicit" . ,timeout))))
+  (session-timeouts-set! driver #:implicit timeout))
 
 (define-public-with-driver (get-implicit-timeout driver)
-  (assoc-ref (session-command driver 'GET "/timeouts" #f) "implicit"))
+  (session-timeouts/implicit driver))
 
 ;;; Navigation
 
