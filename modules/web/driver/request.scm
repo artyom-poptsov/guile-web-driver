@@ -10,7 +10,8 @@
 
 (define (request method uri body-scm)
   (log-debug "request: method: ~a uri: ~a"
-             method uri)
+             method
+             uri)
   (let* ((body-string (scm->json-string body-scm))
          (body-bytevector (and body-scm
                                (request-body->bytevector body-string))))
@@ -26,7 +27,12 @@
                     (message (assoc-ref value "message")))
                 (error:web-driver-error
                  "~a ~a.\nRequest: ~a ~a\nBody: ~a\nError: ~a\nMessage: ~a\n"
-                 (response-code response) (response-reason-phrase response)
-                 method uri body-string error message))))))))
+                 (response-code response)
+                 (response-reason-phrase response)
+                 method
+                 uri
+                 body-string
+                 error
+                 message))))))))
 
 ;;; request.scm ends here.
