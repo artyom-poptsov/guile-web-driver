@@ -93,13 +93,13 @@ localhost:8080."
   (find
    (lambda (try)
      (catch #t
-       (lambda () (request 'GET (format #f "~a/status" driver-uri) #f) #t)
+       (lambda () (request 'GET (make-status-uri driver-uri) #f) #t)
        (lambda (key . args) (usleep (* 10 1000)) #f)))
    (iota 100))
   ;; start a new session
   (catch #t
     (lambda ()
-      (let* ((uri (format #f "~a/session" driver-uri))
+      (let* ((uri (make-session-uri driver-uri))
              (parameters (capabilities->parameters capabilities))
              (response (request 'POST uri parameters))
              (session-id (assoc-ref response "sessionId")))
@@ -193,7 +193,7 @@ localhost:8080."
   (match driver
     (('web-driver driver-uri session-id finalizer)
      (catch #t
-       (lambda () (request 'GET (format #f "~a/status" driver-uri) #f) #t)
+       (lambda () (request 'GET (make-status-uri driver-uri) #f) #t)
        (lambda (key . args) #f)))))
 
 (define* (session-command driver method path #:optional (body-scm '()))
@@ -204,7 +204,7 @@ localhost:8080."
   (match driver
     (('web-driver driver-uri session-id finalizer)
      (request method
-              (format #f "~a/session/~a~a" driver-uri session-id path)
+              (make-session-uri driver-uri session-id path)
               body-scm))))
 
 (define (close driver)
@@ -392,7 +392,7 @@ localhost:8080."
     (('web-driver-element driver element)
      (session-command driver
                       method
-                      (format #f "/element/~a~a" element path)
+                      (make-element-uri element path)
                       body-scm))))
 
 ;;; Finding Elements
@@ -500,19 +500,19 @@ localhost:8080."
 (define-public (attribute element name)
   (fold-null (element-command element
                               'GET
-                              (format #f "/attribute/~a" name)
+                              (make-attribute-uri name)
                               #f)))
 
 (define-public (property element name)
   (fold-null (element-command element
                               'GET
-                              (format #f "/property/~a" name)
+                              (make-property-uri name)
                               #f)))
 
 (define-public (css-value element name)
   (element-command element
                    'GET
-                   (format #f "/css/~a" name)
+                   (make-css-uri name)
                    #f))
 
 (define-public-with-driver (text driver #:optional element)
@@ -595,7 +595,7 @@ localhost:8080."
    (vector->list (session-command driver 'GET "/cookie"))))
 
 (define-public-with-driver (get-named-cookie driver name)
-  (parse-cookie (session-command driver 'GET (format #f "/cookie/~a" name))))
+  (parse-cookie (session-command driver 'GET (make-cookie-uri name))))
 
 (define-public-with-driver
   (add-cookie driver
@@ -615,7 +615,7 @@ localhost:8080."
     (session-command driver 'POST "/cookie" cookie)))
 
 (define-public-with-driver (delete-named-cookie driver name)
-  (session-command driver 'DELETE (format #f "/cookie/~a" name)))
+  (session-command driver 'DELETE (make-cookie-uri name)))
 
 (define-public-with-driver (delete-all-cookies driver)
   (session-command driver 'DELETE "/cookie"))

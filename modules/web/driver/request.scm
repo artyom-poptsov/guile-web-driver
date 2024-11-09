@@ -33,7 +33,42 @@
   #:use-module (web driver log)
   #:use-module ((web driver error) #:prefix error:)
   #:use-module (web driver common)
-  #:export (request))
+  #:export (request
+
+            make-session-uri
+            make-status-uri
+            make-element-uri
+            make-attribute-uri
+            make-property-uri
+            make-cookie-uri
+            make-css-uri))
+
+
+
+(define make-session-uri
+  (case-lambda
+    ((driver-uri)
+     (format #f "~a/session" driver-uri))
+    ((driver-uri session-id path)
+     (format #f "~a/session/~a~a" driver-uri session-id path))))
+
+(define (make-status-uri driver-uri)
+  (format #f "~a/status" driver-uri))
+
+(define (make-element-uri element path)
+  (format #f "/element/~a~a" element path))
+
+(define (make-attribute-uri name)
+  (format #f "/attribute/~a" name))
+
+(define (make-property-uri name)
+  (format #f "/property/~a" name))
+
+(define (make-cookie-uri name)
+  (format #f "/cookie/~a" name))
+
+(define (make-css-uri name)
+  (format #f "/css/~a" name))
 
 
 (define (request method uri body-scm)
