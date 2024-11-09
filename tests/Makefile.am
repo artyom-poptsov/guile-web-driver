@@ -24,6 +24,7 @@ SCM_TESTS = \
 	web/driver/javascript.scm	\
 	web/driver/rect.scm		\
 	web/driver/cookie.scm		\
+	web/driver/key.scm		\
 	web/proxy/common.scm		\
 	web/proxy/connection.scm	\
 	web/proxy/interceptor/chain.scm	\
