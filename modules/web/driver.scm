@@ -196,17 +196,6 @@ localhost:8080."
        (lambda () (request 'GET (make-status-uri driver-uri) #f) #t)
        (lambda (key . args) #f)))))
 
-(define* (session-command driver method path #:optional (body-scm '()))
-  (log-debug "session-command: driver: ~s method: ~a path: ~a"
-             driver
-             method
-             path)
-  (match driver
-    (('web-driver driver-uri session-id finalizer)
-     (request method
-              (make-session-uri driver-uri session-id path)
-              body-scm))))
-
 (define (close driver)
   (match driver
     (('web-driver driver-uri session-id finalizer)

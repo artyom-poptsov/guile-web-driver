@@ -26,6 +26,7 @@
 ;;; Code:
 
 (define-module (web driver request)
+  #:use-module (ice-9 match)
   #:use-module (json)
   #:use-module (web client)
   #:use-module (web request)
@@ -34,6 +35,7 @@
   #:use-module ((web driver error) #:prefix error:)
   #:use-module (web driver common)
   #:export (request
+            session-command
 
             make-session-uri
             make-status-uri
@@ -97,5 +99,18 @@
                  body-string
                  error
                  message))))))))
+
+
+
+(define* (session-command driver method path #:optional (body-scm '()))
+  (log-debug "session-command: driver: ~s method: ~a path: ~a"
+             driver
+             method
+             path)
+  (match driver
+    (('web-driver driver-uri session-id finalizer)
+     (request method
+              (make-session-uri driver-uri session-id path)
+              body-scm))))
 
 ;;; request.scm ends here.
