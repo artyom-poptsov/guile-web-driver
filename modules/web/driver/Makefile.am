@@ -28,7 +28,8 @@ SOURCES = \
 	element.scm	\
 	javascript.scm	\
 	key.scm		\
-	cookie.scm
+	cookie.scm	\
+	request.scm
 
 EXTRA_DIST += \
 	config.scm.in

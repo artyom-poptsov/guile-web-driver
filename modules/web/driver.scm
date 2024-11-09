@@ -46,6 +46,7 @@
   #:use-module (web driver javascript)
   #:use-module (web driver cookie)
   #:use-module (web driver key)
+  #:use-module (web driver request)
   #:export (open-web-driver))
 
 
@@ -77,27 +78,6 @@ localhost:8080."
             (lambda (request body) (current-handler request body))
             'http
             (list #:socket server-socket)))))))
-
-(define (request method uri body-scm)
-  (log-debug "request: method: ~a uri: ~a"
-             method uri)
-  (let* ((body-string (scm->json-string body-scm))
-         (body-bytevector (and body-scm
-                               (request-body->bytevector body-string))))
-    (call-with-values
-        (lambda ()
-          (http-request uri #:method method #:body body-bytevector))
-      (lambda (response body)
-        (let ((value (assoc-ref (json-bytevector->scm body) "value")))
-          (log-debug "request: response-code: ~a" (response-code response))
-          (if (equal? 200 (response-code response))
-              value
-              (let ((error (assoc-ref value "error"))
-                    (message (assoc-ref value "message")))
-                (error:web-driver-error
-                 "~a ~a.\nRequest: ~a ~a\nBody: ~a\nError: ~a\nMessage: ~a\n"
-                 (response-code response) (response-reason-phrase response)
-                 method uri body-string error message))))))))
 
 (define (close-driver-pipe pipe)
   (kill (hashq-ref port/pid-table pipe) SIGTERM)
