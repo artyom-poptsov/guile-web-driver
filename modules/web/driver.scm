@@ -264,10 +264,10 @@ localhost:8080."
 ;;; Navigation
 
 (define-public-with-driver (navigate-to driver url)
-  (session-command driver 'POST "/url" `(("url" . ,url))))
+  (session-url-set! driver url))
 
 (define-public-with-driver (current-url driver)
-  (session-command driver 'GET "/url"))
+  (session-url driver))
 
 (define-public-with-driver (back driver)
   (session-command driver 'POST "/back"))

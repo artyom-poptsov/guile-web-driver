@@ -43,6 +43,9 @@
             session-timeouts/script
             session-timeouts-set!
 
+            session-url
+            session-url-set!
+
             make-session-uri
             make-status-uri
             make-element-uri
@@ -161,5 +164,18 @@
     (when (null? data)
       (error:web-driver-error "No timeouts provided"))
   (session-command driver 'POST %timeouts-path data)))
+
+
+
+(define %url-path "/url")
+(define %url:url  "url")
+
+(define (session-url-set! driver url)
+  "Set the session URL for a DRIVER."
+  (session-command driver 'POST %url-path `((,%url:url . ,url))))
+
+(define (session-url driver)
+  "Get the session URL for a DRIVER."
+  (session-command driver 'GET %url-path))
 
 ;;; request.scm ends here.
