@@ -46,7 +46,7 @@
   #:use-module (web driver javascript)
   #:use-module (web driver cookie)
   #:use-module (web driver key)
-  #:use-module (web driver request)
+  #:use-module (web driver api)
   #:export (open-web-driver))
 
 

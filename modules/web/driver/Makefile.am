@@ -29,7 +29,7 @@ SOURCES = \
 	javascript.scm	\
 	key.scm		\
 	cookie.scm	\
-	request.scm
+	api.scm
 
 EXTRA_DIST += \
 	config.scm.in

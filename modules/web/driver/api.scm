@@ -25,7 +25,7 @@
 
 ;;; Code:
 
-(define-module (web driver request)
+(define-module (web driver api)
   #:use-module (ice-9 match)
   #:use-module (json)
   #:use-module (web client)
