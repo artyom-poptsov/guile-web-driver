@@ -42,9 +42,12 @@
             session-timeouts/page-load
             session-timeouts/script
             session-timeouts-set!
-
             session-url
             session-url-set!
+            session-back!
+            session-forward!
+            session-refresh!
+            session-title
 
             make-session-uri
             make-status-uri
@@ -177,5 +180,22 @@
 (define (session-url driver)
   "Get the session URL for a DRIVER."
   (session-command driver 'GET %url-path))
+
+(define %back-path "/back")
+(define (session-back! driver)
+  "Go back one page."
+  (session-command driver 'POST %back-path))
+
+(define %forward-path "/forward")
+(define (session-forward! driver)
+  (session-command driver 'POST %forward-path))
+
+(define %refresh-path "/refresh")
+(define (session-refresh! driver)
+  (session-command driver 'POST %refresh-path))
+
+(define %title-path "/title")
+(define (session-title driver)
+  (session-command driver 'GET %title-path))
 
 ;;; request.scm ends here.

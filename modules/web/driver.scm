@@ -270,16 +270,16 @@ localhost:8080."
   (session-url driver))
 
 (define-public-with-driver (back driver)
-  (session-command driver 'POST "/back"))
+  (session-back! driver))
 
 (define-public-with-driver (forward driver)
-  (session-command driver 'POST "/forward"))
+  (session-forward! driver))
 
 (define-public-with-driver (refresh driver)
-  (session-command driver 'POST "/refresh"))
+  (session-refresh! driver))
 
 (define-public-with-driver (title driver)
-  (session-command driver 'GET "/title"))
+  (session-title driver))
 
 ;;; Windows
 
