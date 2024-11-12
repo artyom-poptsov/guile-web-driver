@@ -287,11 +287,10 @@ localhost:8080."
   (list 'web-driver-window driver window-object))
 
 (define-public-with-driver (current-window driver)
-  (web-driver-window driver
-                     (session-command driver 'GET "/window")))
+  (web-driver-window driver (session-window driver)))
 
 (define-public-with-driver (close-window driver)
-  (session-command driver 'DELETE "/window" '())
+  (session-window-delete! driver)
   ;; XXX chromedriver would keep the deleted window currect,
   ;; causing all following navigation calls to fail.
   (switch-to (first (all-windows driver))))
@@ -299,15 +298,13 @@ localhost:8080."
 (define-public-with-driver (all-windows driver)
   (map
    (lambda (window-object) (web-driver-window driver window-object))
-   (vector->list (session-command driver 'GET "/window/handles"))))
+   (vector->list (session-window-handles driver))))
 
 (define (new-window driver type)
   (log-info "new-window: driver: ~s type: ~a" driver type)
   (web-driver-window
    driver
-   (assoc-ref
-    (session-command driver 'POST "/window/new" `(("type" . ,type)))
-    "handle")))
+   (assoc-ref (session-window-new! driver type) "handle")))
 
 (define-public-with-driver (open-new-window driver)
   (new-window driver "window"))

@@ -48,6 +48,10 @@
             session-forward!
             session-refresh!
             session-title
+            session-window
+            session-window-delete!
+            session-window-handles
+            session-window-new!
 
             make-session-uri
             make-status-uri
@@ -197,5 +201,25 @@
 (define %title-path "/title")
 (define (session-title driver)
   (session-command driver 'GET %title-path))
+
+
+
+(define %window-path         "/window")
+(define %window-handles-path "/window/handles")
+(define %window-new-path     "/window/new")
+(define (session-window driver)
+  (session-command driver 'GET %window-path))
+
+(define (session-window-delete! driver)
+  (session-command driver 'DELETE %window-path '()))
+
+(define (session-window-handles driver)
+  (session-command driver 'GET %window-handles-path))
+
+(define (session-window-new! driver type)
+  (session-command driver
+                   'POST
+                   %window-new-path
+                   `(("type" . ,type))))
 
 ;;; request.scm ends here.
